@@ -5,12 +5,14 @@ namespace Tiny\Libs;
 use Exception;
 use Tiny\exceptions\FileNotFoundException;
 use Tiny\exceptions\MethodNotSupported;
+use Tiny\Interfaces\IRequest;
 
 /**
  * $app->get('/', function(req, res){}, middleware)
  */
 class App {
     private const BASE_PATH = __DIR__ . "/../..";
+    private $callback;
 
     private $register = [
         "GET" => [],
@@ -36,8 +38,14 @@ class App {
                 throw new MethodNotSupported("Method not supported");
             }
 
-            if($registeredMethod[$url]){ 
-                $registeredMethod[$url]($req, $res);
+            // Match path
+            // if($registeredMethod[$url]){ 
+            //     $registeredMethod[$url]($req, $res);
+            // }else{
+            //     throw new FileNotFoundException("404 Not Found");
+            // }
+            if($this->hasRoute($url, $method, $req)){
+                call_user_func($this->callback, $res, $req);
             }else{
                 throw new FileNotFoundException("404 Not Found");
             }
@@ -80,6 +88,19 @@ class App {
 
     public function any(String $route, $callback, $middleware = null){
         throw new Exception("Method not Implemented");
+    }
+
+    public function hasRoute(String $url, $method, IRequest &$req): bool {
+        $matcher = new RouteMatcher();
+        foreach ($this->register[$method] as $key => $value) {
+            $result = $matcher->match($key, $url);
+            if($result == true){
+                $this->callback = $value;
+                $req->setPathParams($matcher->pathParams);
+            }
+            return $result;
+        }
+        return false;
     }
 
     public function options(String $route, $callback, $middleware = null){}

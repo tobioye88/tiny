@@ -10,5 +10,6 @@ interface IRequest {
     public function getPathParams();
     public function getUrl();
     public function getMethod();
+    public function setPathParams($pathParams);
 
 }

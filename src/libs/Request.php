@@ -59,6 +59,11 @@ class Request implements IRequest {
     {
         return $this->pathParameters;
     }
+
+    public function setPathParams($pathParams)
+    {
+        $this->pathParameters = $pathParams;
+    }
     
     public function getUrl(){
         return $this->url;
