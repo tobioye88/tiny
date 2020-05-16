@@ -3,8 +3,11 @@
 namespace Tiny\Libs;
 
 use Exception;
-use Tiny\exceptions\FileNotFoundException;
-use Tiny\exceptions\MethodNotSupported;
+use Tiny\exceptions\HttpBadRequestException;
+use Tiny\exceptions\HttpErrorHandler;
+use Tiny\exceptions\HttpMethodNotAllowedException;
+use Tiny\exceptions\HttpNotImplementedException;
+use Tiny\exceptions\ResourceNotFound;
 use Tiny\Interfaces\IRequest;
 
 /**
@@ -35,49 +38,31 @@ class App {
             $registeredMethod = $this->register[$method];
             
             if($registeredMethod == null){
-                throw new MethodNotSupported("Method not supported");
+                throw new HttpMethodNotAllowedException("Method not supported");
             }
 
-            // Match path
-            // if($registeredMethod[$url]){ 
-            //     $registeredMethod[$url]($req, $res);
-            // }else{
-            //     throw new FileNotFoundException("404 Not Found");
-            // }
             if($this->hasRoute($url, $method, $req)){
                 call_user_func($this->callback, $req, $res);
             }else{
-                throw new FileNotFoundException("404 Not Found");
+                throw new ResourceNotFound("404 Not Found");
             }
-            
-            //when ever a request comes in
-            //look to find handler
-            //if handler not found return 404 status
         }catch (Exception $e){
-            //TODO: handle Exception Response
-            //TODO: 404 middleware
-            //TODO: Method not supported
-            //http_response_code(404);
+            HttpErrorHandler::handle($e);
         }
     }
 
     public function group(String $route, callable $callback, $middleware = null){
-
+        throw new HttpNotImplementedException("Method not Implemented"); //TODO
     }
 
     public function get(String $route, callable $callback, $middleware = null){
         $this->register['GET'][$route] = $callback;
-        // echo "<pre>";
-        // echo $route . PHP_EOL;
-        // print_r($this->register);
     }
+
     public function post(String $route, callable $callback, $middleware = null){
         $this->register['POST'][$route] = $callback; 
-        //images
-        //formData
-        //json
-        //blob
     }
+
     public function put(String $route, callable $callback, $middleware = null){
         $this->register['PUT'][$route] = $callback; 
     }
@@ -87,7 +72,7 @@ class App {
     }
 
     public function any(String $route, callable $callback, $middleware = null){
-        throw new Exception("Method not Implemented");
+        throw new HttpNotImplementedException("Method not Implemented"); //TODO
     }
 
     public function hasRoute(String $url, $method, IRequest &$req): bool {
@@ -105,5 +90,30 @@ class App {
 
     public function options(String $route, callable $callback, $middleware = null){}
     public function patch(String $route, callable $callback, $middleware = null){}
+
+
+    public function cors(array $allowed_domains = []){
+        if (isset($_SERVER['HTTP_ORIGIN']) && !in_array($_SERVER['HTTP_ORIGIN'], $allowed_domains)) {
+            header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
+            header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+            header('Access-Control-Allow-Credentials: true');
+            header('Access-Control-Max-Age: 86400');    // cache for 1 day
+        }
+
+        // Access-Control headers are received during OPTIONS requests
+        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+            
+            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+            // may also be using PUT, PATCH, HEAD etc
+            header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
+            
+            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+            header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+            
+            exit(0);
+        }
+
+        throw new HttpBadRequestException("Origin not allowed");
+    }
 
 }

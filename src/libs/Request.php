@@ -17,15 +17,14 @@ class Request implements IRequest {
     public function __construct()
     {
         $this->setUp();
-        $this->cors();
     }
 
     public function setUp()
     {
         $url = $_GET['url'] ?? $_SERVER['REQUEST_URI'];
         $this->url = preg_replace("/\?.*/", "", $url);
-        $this->method = $_SERVER['REQUEST_METHOD'];
-        $this->contentType = $_SERVER["CONTENT_TYPE"];
+        $this->method = $_SERVER['REQUEST_METHOD'] ?? '';
+        $this->contentType = $_SERVER["CONTENT_TYPE"] ?? '';
         $this->queryParameters = $_GET;
         // $this->body = $_POST;
         $this->files = $_FILES;
@@ -89,12 +88,5 @@ class Request implements IRequest {
         $inputJSON = file_get_contents('php://input');
         return json_decode($inputJSON, $inArray);
         
-    }
-
-    public function cors($allowed_domains = []){
-        // $allowed_domains = [];
-        if (!in_array($_SERVER['HTTP_ORIGIN'], $allowed_domains)) {
-            header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
-        }
     }
 }

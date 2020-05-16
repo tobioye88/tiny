@@ -1,9 +1,8 @@
 <?php
 
 namespace Tiny\exceptions;
-
 use Exception;
 
-class MethodNotSupported extends Exception {
-    
+class HttpException extends Exception {
+
 }

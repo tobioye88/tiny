@@ -36,7 +36,7 @@ class RouteMatcher {
         array_shift($matches);
         $this->setPathParams($keys, $matches);
 
-        return !!$result;
+        return (!!$result && substr_count($httpRoute, '/') == substr_count($appRoute, '/'));
     }
 
     public function routeEquals(String $appRoute, String $httpRoute): bool {

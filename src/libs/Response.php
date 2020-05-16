@@ -10,7 +10,7 @@ class Response implements IResponse {
     // header('Access-Control-Allow-Origin: *');
 
     public function status(int $code){
-        HttpHeader::code($code);
+        HttpHeader::setStatusCode($code);
         return $this;
     }
 
@@ -44,8 +44,9 @@ class Response implements IResponse {
 
     public function json($body, $statusCode=200){
         // header_remove();
-        header('Content-type: application/json; charset=utf-8');
-        HttpHeader::code($statusCode);
+        // header('Content-type: application/json; charset=utf-8');
+        HttpHeader::setContentType('json');
+        HttpHeader::setStatusCode($statusCode);
         echo json_encode($body); //, JSON_PRETTY_PRINT
         exit();
     }

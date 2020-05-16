@@ -16,7 +16,7 @@ class HttpHeader {
             'php' => 'text/html',
             'css' => 'text/css',
             'js' => 'application/javascript',
-            'json' => 'application/json',
+            'json' => 'application/json; charset=utf-8',
             'xml' => 'application/xml',
             'swf' => 'application/x-shockwave-flash',
             'flv' => 'video/x-flv',
@@ -73,7 +73,7 @@ class HttpHeader {
         return $mimeTypes[$type] ?? 'text/html';
     }
 
-    public static function code($code = NULL) {
+    public static function setStatusCode($code = NULL) {
         if ($code !== NULL) {
             switch ($code) {
                 case 100: $text = 'Continue';

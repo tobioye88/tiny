@@ -20,6 +20,10 @@ $app->get('/api/{name}', function(IRequest $req, IResponse $res){
     $res->json(["GREETINGS" => $req->getPathParam('name')]);
 });
 
+$app->get('/api/{name}/world', function(IRequest $req, IResponse $res){
+    $res->json(["user" => [ 'username'=> $req->getPathParam('name')] ]);
+});
+
 $app->put('/api', function(IRequest $req, IResponse $res){
     $res->json(["Hello" => 1]);
 });
