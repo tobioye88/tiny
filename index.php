@@ -16,8 +16,8 @@ $app->get('/', function(IRequest $req, IResponse $res){
     $res->json(["GREETINGS" => "/"]);
 });
 
-$app->get('/api', function(IRequest $req, IResponse $res){
-    $res->json(["GREETINGS" => "/api"]);
+$app->get('/api/{name}', function(IRequest $req, IResponse $res){
+    $res->json(["GREETINGS" => $req->getPathParam('name')]);
 });
 
 $app->put('/api', function(IRequest $req, IResponse $res){
@@ -26,6 +26,11 @@ $app->put('/api', function(IRequest $req, IResponse $res){
 
 $app->get('/home', function(IRequest $req, IResponse $res){
     $res->view('/view/index.php', "Hello World");
+});
+
+$app->post('/api/post', function(IRequest $req, IResponse $res){
+    // $req->body
+    $res->json($req->body);
 });
 
 

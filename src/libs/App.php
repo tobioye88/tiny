@@ -11,7 +11,7 @@ use Tiny\Interfaces\IRequest;
  * $app->get('/', function(req, res){}, middleware)
  */
 class App {
-    private const BASE_PATH = __DIR__ . "/../..";
+    public const BASE_PATH = __DIR__ . "/../..";
     private $callback;
 
     private $register = [
@@ -45,7 +45,7 @@ class App {
             //     throw new FileNotFoundException("404 Not Found");
             // }
             if($this->hasRoute($url, $method, $req)){
-                call_user_func($this->callback, $res, $req);
+                call_user_func($this->callback, $req, $res);
             }else{
                 throw new FileNotFoundException("404 Not Found");
             }
@@ -61,32 +61,32 @@ class App {
         }
     }
 
-    public function group(String $route, $callback, $middleware = null){
+    public function group(String $route, callable $callback, $middleware = null){
 
     }
 
-    public function get(String $route, $callback, $middleware = null){
+    public function get(String $route, callable $callback, $middleware = null){
         $this->register['GET'][$route] = $callback;
         // echo "<pre>";
         // echo $route . PHP_EOL;
         // print_r($this->register);
     }
-    public function post(String $route, $callback, $middleware = null){
+    public function post(String $route, callable $callback, $middleware = null){
         $this->register['POST'][$route] = $callback; 
         //images
         //formData
         //json
         //blob
     }
-    public function put(String $route, $callback, $middleware = null){
+    public function put(String $route, callable $callback, $middleware = null){
         $this->register['PUT'][$route] = $callback; 
     }
 
-    public function delete(String $route, $callback, $middleware = null){
+    public function delete(String $route, callable $callback, $middleware = null){
         $this->register['DELETE'][$route] = $callback; 
     }
 
-    public function any(String $route, $callback, $middleware = null){
+    public function any(String $route, callable $callback, $middleware = null){
         throw new Exception("Method not Implemented");
     }
 
@@ -94,16 +94,16 @@ class App {
         $matcher = new RouteMatcher();
         foreach ($this->register[$method] as $key => $value) {
             $result = $matcher->match($key, $url);
-            if($result == true){
+            if($result){
                 $this->callback = $value;
                 $req->setPathParams($matcher->pathParams);
+                return $result;
             }
-            return $result;
         }
         return false;
     }
 
-    public function options(String $route, $callback, $middleware = null){}
-    public function patch(String $route, $callback, $middleware = null){}
+    public function options(String $route, callable $callback, $middleware = null){}
+    public function patch(String $route, callable $callback, $middleware = null){}
 
 }
