@@ -24,7 +24,7 @@ class RouteMatcher {
     public function routeWithPathParamsEquals(String $appRoute, String $httpRoute): bool {
         $appRoute = trim($appRoute, "/");
         $httpRoute = trim($httpRoute, "/");
-
+        
         preg_match_all(self::$KEY_PATTERN, $appRoute, $keys);
         // print_r($keys);
 
@@ -40,7 +40,7 @@ class RouteMatcher {
     }
 
     public function routeEquals(String $appRoute, String $httpRoute): bool {
-        return $appRoute == $httpRoute;
+        return trim($appRoute, "/") == trim($httpRoute, "/");
     }
 
     public function routeContainsPathParams(String $appRoute): bool {

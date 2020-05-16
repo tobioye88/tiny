@@ -25,7 +25,7 @@ $app->get('/api/{name}/world', function(IRequest $req, IResponse $res){
 });
 
 $app->put('/api', function(IRequest $req, IResponse $res){
-    $res->json(["Hello" => 1]);
+    $res->json(["res" => trim("/api/", '/')]);
 });
 
 $app->get('/home', function(IRequest $req, IResponse $res){

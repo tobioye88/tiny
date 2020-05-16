@@ -56,19 +56,19 @@ class App {
     }
 
     public function get(String $route, callable $callback, $middleware = null){
-        $this->register['GET'][$route] = $callback;
+        $this->register['GET'][trim($route, "/")] = $callback;
     }
 
     public function post(String $route, callable $callback, $middleware = null){
-        $this->register['POST'][$route] = $callback; 
+        $this->register['POST'][trim($route, "/")] = $callback; 
     }
 
     public function put(String $route, callable $callback, $middleware = null){
-        $this->register['PUT'][$route] = $callback; 
+        $this->register['PUT'][trim($route, "/")] = $callback; 
     }
 
     public function delete(String $route, callable $callback, $middleware = null){
-        $this->register['DELETE'][$route] = $callback; 
+        $this->register['DELETE'][trim($route, "/")] = $callback; 
     }
 
     public function any(String $route, callable $callback, $middleware = null){
@@ -77,6 +77,7 @@ class App {
 
     public function hasRoute(String $url, $method, IRequest &$req): bool {
         $matcher = new RouteMatcher();
+        // print_r($this->register[$method]);
         foreach ($this->register[$method] as $key => $value) {
             $result = $matcher->match($key, $url);
             if($result){

@@ -5,7 +5,9 @@ namespace Tiny\Libs;
 class HttpHeader {
 
     public static function setContentType($type){
-        header('Content-Type: ' . self::getMimeType(($type)));
+        if(!headers_sent()){
+            header('Content-Type: ' . self::getMimeType(($type)));
+        }
     }
 
     public static function getMimeType($type){
@@ -74,6 +76,10 @@ class HttpHeader {
     }
 
     public static function setStatusCode($code = NULL) {
+        if(headers_sent()){
+            return;
+        }
+        
         if ($code !== NULL) {
             switch ($code) {
                 case 100: $text = 'Continue';
