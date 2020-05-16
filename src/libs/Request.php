@@ -10,12 +10,14 @@ class Request implements IRequest {
     public $method = "";
     public $contentType = "";
     public $queryParameters = [];
-    Public $pathParameters = [];
+    public $pathParameters = [];
+    public $body;
 
 
     public function __construct()
     {
         $this->setUp();
+        $this->cors();
     }
 
     public function setUp()
@@ -25,7 +27,9 @@ class Request implements IRequest {
         $this->method = $_SERVER['REQUEST_METHOD'];
         $this->contentType = $_SERVER["CONTENT_TYPE"];
         $this->queryParameters = $_GET;
-
+        // $this->body = $_POST;
+        $this->files = $_FILES;
+        $this->body = $this->parseBody();
         // print_r(getallheaders());
 
         if ('PUT' === $this->method) {
@@ -74,5 +78,18 @@ class Request implements IRequest {
             queryParameters: " . count($this->queryParameters) ."
             pathParameters: " . count($this->pathParameters) ."
         }";
+    }
+
+    public function parseBody($inArray = false){
+        $inputJSON = file_get_contents('php://input');
+        return json_decode($inputJSON, $inArray);
+        
+    }
+
+    public function cors($allowed_domains = []){
+        // $allowed_domains = [];
+        if (!in_array($_SERVER['HTTP_ORIGIN'], $allowed_domains)) {
+            header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
+        }
     }
 }

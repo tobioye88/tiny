@@ -2,10 +2,15 @@
 
 namespace Tiny\Libs;
 
+use Exception;
+use Tiny\exceptions\FileNotFoundException;
+use Tiny\exceptions\MethodNotSupported;
+
 /**
  * $app->get('/', function(req, res){}, middleware)
  */
 class App {
+    private const BASE_PATH = __DIR__ . "/../..";
 
     private $register = [
         "GET" => [],
@@ -19,32 +24,37 @@ class App {
     }
 
     public function start(){
-        $req = new Request;
-        $res = new Response;
+        try{
+            $req = new Request;
+            $res = new Response;
+    
+            $url = $req->getUrl();
+            $method = $req->getMethod();
+            $registeredMethod = $this->register[$method];
+            
+            if($registeredMethod == null){
+                throw new MethodNotSupported("Method not supported");
+            }
 
-        $url = $req->getUrl();
-        $method = $req->getMethod();
-        $registeredMethod = $this->register[$method];
-        // echo count($registeredMethod);
-        if($registeredMethod == null){
-            //Method not supported
-            return;
-        }
-        if($registeredMethod[$url]){ 
-            $registeredMethod[$url]($req, $res);
-        }else{
+            if($registeredMethod[$url]){ 
+                $registeredMethod[$url]($req, $res);
+            }else{
+                throw new FileNotFoundException("404 Not Found");
+            }
+            
+            //when ever a request comes in
+            //look to find handler
+            //if handler not found return 404 status
+        }catch (Exception $e){
+            //TODO: handle Exception Response
             //TODO: 404 middleware
-            http_response_code(404);
-            echo "404 Not Found";
+            //TODO: Method not supported
+            //http_response_code(404);
         }
-
-        //when ever a request comes in
-        //look to find handler
-        //if handler not found return 404 status
     }
 
     public function group(String $route, $callback, $middleware = null){
-        
+
     }
 
     public function get(String $route, $callback, $middleware = null){
@@ -63,8 +73,13 @@ class App {
     public function put(String $route, $callback, $middleware = null){
         $this->register['PUT'][$route] = $callback; 
     }
+
     public function delete(String $route, $callback, $middleware = null){
         $this->register['DELETE'][$route] = $callback; 
+    }
+
+    public function any(String $route, $callback, $middleware = null){
+        throw new Exception("Method not Implemented");
     }
 
     public function options(String $route, $callback, $middleware = null){}

@@ -24,5 +24,9 @@ $app->put('/api', function(IRequest $req, IResponse $res){
     $res->json(["Hello" => 1]);
 });
 
+$app->get('/home', function(IRequest $req, IResponse $res){
+    $res->view('/view/index.php', "Hello World");
+});
+
 
 $app->start();
