@@ -11,5 +11,7 @@ interface IRequest {
     public function getUrl();
     public function getMethod();
     public function setPathParams($pathParams);
+    public function getHeader(String $name);
+    public function getHeaders();
 
 }

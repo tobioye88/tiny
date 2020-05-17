@@ -9,6 +9,7 @@ use Tiny\exceptions\HttpMethodNotAllowedException;
 use Tiny\exceptions\HttpNotImplementedException;
 use Tiny\exceptions\ResourceNotFound;
 use Tiny\Interfaces\IRequest;
+use Tiny\Interfaces\IMiddleware;
 
 /**
  * $app->get('/', function(req, res){}, middleware)
@@ -16,6 +17,8 @@ use Tiny\Interfaces\IRequest;
 class App {
     public const BASE_PATH = __DIR__ . "/../..";
     private $callback;
+    private $globalMiddleWare = [];
+    private $routMiddleWare = [];
 
     private $register = [
         "GET" => [],
@@ -23,6 +26,17 @@ class App {
         "PUT" => [],
         "DELETE" => [],
     ];
+
+    public function __construct()
+    {
+        set_exception_handler(function($exception) {
+            HttpErrorHandler::handle($exception);
+        });
+    }
+
+    public function addMiddleWare(IMiddleware $middleware){
+        $this->globalMiddleWare[] = $middleware;
+    }
     
     public function run(){
         $this->start();
@@ -32,6 +46,10 @@ class App {
         try{
             $req = new Request;
             $res = new Response;
+            
+            foreach($this->globalMiddleWare as $key => $middleware){
+                $middleware->handle($req, $res);
+            }
     
             $url = $req->getUrl();
             $method = $req->getMethod();
@@ -42,6 +60,10 @@ class App {
             }
 
             if($this->hasRoute($url, $method, $req)){
+                $routeMiddleware = $this->routMiddleWare[trim($url, "/")] ?? [];
+                foreach($routeMiddleware as $key => $middleware){
+                    $middleware->handle($req, $res);
+                }
                 call_user_func($this->callback, $req, $res);
             }else{
                 throw new ResourceNotFound("404 Not Found");
@@ -51,27 +73,32 @@ class App {
         }
     }
 
-    public function group(String $route, callable $callback, $middlewares = []){
+    public function group(String $route, callable $callback, array $middlewares = []){
         throw new HttpNotImplementedException("Method not Implemented"); //TODO
     }
 
-    public function get(String $route, callable $callback, $middlewares = []){
+    public function get(String $route, callable $callback, array $middlewares = []){
+        $this->routMiddleWare[trim($route, "/")] = $middlewares;
         $this->register['GET'][trim($route, "/")] = $callback;
     }
 
-    public function post(String $route, callable $callback, $middlewares = []){
+    public function post(String $route, callable $callback, array $middlewares = []){
+        $this->routMiddleWare[trim($route, "/")] = $middlewares;
         $this->register['POST'][trim($route, "/")] = $callback; 
     }
 
-    public function put(String $route, callable $callback, $middlewares = []){
+    public function put(String $route, callable $callback, array $middlewares = []){
+        $this->routMiddleWare[trim($route, "/")] = $middlewares;
         $this->register['PUT'][trim($route, "/")] = $callback; 
     }
 
-    public function delete(String $route, callable $callback, $middlewares = []){
+    public function delete(String $route, callable $callback, array $middlewares = []){
+        $this->routMiddleWare[trim($route, "/")] = $middlewares;
         $this->register['DELETE'][trim($route, "/")] = $callback; 
     }
 
-    public function any(String $route, callable $callback, $middlewares = []){
+    public function any(String $route, callable $callback, array $middlewares = []){
+        $this->routMiddleWare[trim($route, "/")] = $middlewares;
         throw new HttpNotImplementedException("Method not Implemented"); //TODO
     }
 
@@ -89,8 +116,13 @@ class App {
         return false;
     }
 
-    public function options(String $route, callable $callback, $middlewares = []){}
-    public function patch(String $route, callable $callback, $middlewares = []){}
+    public function options(String $route, callable $callback, array $middlewares = []){
+        $this->routMiddleWare[trim($route, "/")] = $middlewares;
+    }
+    
+    public function patch(String $route, callable $callback, array $middlewares = []){
+        $this->routMiddleWare[trim($route, "/")] = $middlewares;
+    }
 
 
     public function cors(array $allowed_domains = []){

@@ -12,6 +12,7 @@ class Request implements IRequest {
     public $queryParameters = [];
     public $pathParameters = [];
     public $body;
+    private $headers;
 
 
     public function __construct()
@@ -30,6 +31,7 @@ class Request implements IRequest {
         $this->files = $_FILES;
         $this->body = $this->parseBody();
         // print_r(getallheaders());
+        $this->headers =  apache_request_headers();
 
         if ('PUT' === $this->method) {
             parse_str(file_get_contents('php://input'), $_PUT);
@@ -88,5 +90,13 @@ class Request implements IRequest {
         $inputJSON = file_get_contents('php://input');
         return json_decode($inputJSON, $inArray);
         
+    }
+
+    public function getHeader(String $name){
+        return $this->headers[$name];
+    }
+
+    public function getHeaders(){
+        return $this->headers;
     }
 }
