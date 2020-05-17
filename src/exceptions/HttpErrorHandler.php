@@ -44,7 +44,6 @@ class HttpErrorHandler {
         if (
             !($exception instanceof HttpException)
             && ($exception instanceof Exception || $exception instanceof Throwable)
-            && $this->displayErrorDetails
         ) {
             $description = $exception->getMessage();
         }

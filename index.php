@@ -6,6 +6,7 @@ spl_autoload_register(function ($fullClassName) {
 	require $fullClassName.'.php';
 });
 
+use Tiny\exceptions\HttpNotImplementedException;
 use Tiny\Libs\App;
 use Tiny\Interfaces\IRequest;
 use Tiny\Interfaces\IResponse;
