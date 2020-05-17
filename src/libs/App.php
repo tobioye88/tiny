@@ -13,6 +13,9 @@ use Tiny\Interfaces\IMiddleware;
 
 /**
  * $app->get('/', function(req, res){}, middleware)
+ * $app->group('/', function($group){
+ *      $group->get('', function($req, $res){}, [$middlewares])
+ * }, [middlewares]); 
  */
 class App {
     public const BASE_PATH = __DIR__ . "/../..";

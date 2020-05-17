@@ -45,5 +45,9 @@ $app->post('/api/post', function(IRequest $req, IResponse $res){
     $res->json($req->body);
 });
 
+$app->group('api/admin', function($group){
+    $group->get('/', function($req, $res){}, [$middlewares]);
+}, [$middlewares]);
+
 
 $app->start();
