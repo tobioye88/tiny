@@ -51,27 +51,27 @@ class App {
         }
     }
 
-    public function group(String $route, callable $callback, $middleware = null){
+    public function group(String $route, callable $callback, $middlewares = []){
         throw new HttpNotImplementedException("Method not Implemented"); //TODO
     }
 
-    public function get(String $route, callable $callback, $middleware = null){
+    public function get(String $route, callable $callback, $middlewares = []){
         $this->register['GET'][trim($route, "/")] = $callback;
     }
 
-    public function post(String $route, callable $callback, $middleware = null){
+    public function post(String $route, callable $callback, $middlewares = []){
         $this->register['POST'][trim($route, "/")] = $callback; 
     }
 
-    public function put(String $route, callable $callback, $middleware = null){
+    public function put(String $route, callable $callback, $middlewares = []){
         $this->register['PUT'][trim($route, "/")] = $callback; 
     }
 
-    public function delete(String $route, callable $callback, $middleware = null){
+    public function delete(String $route, callable $callback, $middlewares = []){
         $this->register['DELETE'][trim($route, "/")] = $callback; 
     }
 
-    public function any(String $route, callable $callback, $middleware = null){
+    public function any(String $route, callable $callback, $middlewares = []){
         throw new HttpNotImplementedException("Method not Implemented"); //TODO
     }
 
@@ -89,8 +89,8 @@ class App {
         return false;
     }
 
-    public function options(String $route, callable $callback, $middleware = null){}
-    public function patch(String $route, callable $callback, $middleware = null){}
+    public function options(String $route, callable $callback, $middlewares = []){}
+    public function patch(String $route, callable $callback, $middlewares = []){}
 
 
     public function cors(array $allowed_domains = []){
@@ -106,10 +106,10 @@ class App {
             
             if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
             // may also be using PUT, PATCH, HEAD etc
-            header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
+                header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
             
             if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-            header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+                header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
             
             exit(0);
         }
