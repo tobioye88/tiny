@@ -8,6 +8,7 @@ use Tiny\exceptions\HttpErrorHandler;
 use Tiny\exceptions\HttpMethodNotAllowedException;
 use Tiny\exceptions\HttpNotImplementedException;
 use Tiny\exceptions\ResourceNotFound;
+use Tiny\Interfaces\IHttpAllowedMethods;
 use Tiny\Interfaces\IRequest;
 use Tiny\Interfaces\IMiddleware;
 
@@ -17,7 +18,7 @@ use Tiny\Interfaces\IMiddleware;
  *      $group->get('', function($req, $res){}, [$middlewares])
  * }, [middlewares]); 
  */
-class App {
+class App implements IHttpAllowedMethods {
     public const BASE_PATH = __DIR__ . "/../..";
     private $callback;
     private $globalMiddleWare = [];
@@ -32,9 +33,9 @@ class App {
 
     public function __construct()
     {
-        set_exception_handler(function($exception) {
-            HttpErrorHandler::handle($exception);
-        });
+        // set_exception_handler(function($exception) {
+        //     HttpErrorHandler::handle($exception);
+        // });
     }
 
     public function addMiddleWare(IMiddleware $middleware){
@@ -76,8 +77,16 @@ class App {
         }
     }
 
-    public function group(String $route, callable $callback, array $middlewares = []){
-        throw new HttpNotImplementedException("Method not Implemented"); //TODO
+    public function group(String $prefix, callable $callback, array $middlewares = []){
+        $group = new Group();
+        $callback($group);
+        $groupRoutes = $group->getRoutes($prefix);
+        $groupMiddleware = $group->getMiddlewares($prefix, $middlewares);
+        $this->register['GET'] = array_merge($this->register['GET'], $groupRoutes['GET']);
+        $this->register['POST'] = array_merge($this->register['POST'], $groupRoutes['POST']);
+        $this->register['PUT'] = array_merge($this->register['PUT'], $groupRoutes['PUT']);
+        $this->register['DELETE'] = array_merge($this->register['DELETE'], $groupRoutes['DELETE']);
+        $this->routMiddleWare = array_merge($this->routMiddleWare, $groupMiddleware);
     }
 
     public function get(String $route, callable $callback, array $middlewares = []){
@@ -131,7 +140,7 @@ class App {
     public function cors(array $allowed_domains = []){
         if (isset($_SERVER['HTTP_ORIGIN']) && !in_array($_SERVER['HTTP_ORIGIN'], $allowed_domains)) {
             header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
-            header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+            header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
             header('Access-Control-Allow-Credentials: true');
             header('Access-Control-Max-Age: 86400');    // cache for 1 day
         }

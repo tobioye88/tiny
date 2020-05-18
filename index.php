@@ -6,9 +6,7 @@ spl_autoload_register(function ($fullClassName) {
 	require $fullClassName.'.php';
 });
 
-use Tiny\exceptions\HttpNotImplementedException;
-use Tiny\exceptions\HttpUnauthorizedException;
-use Tiny\Interfaces\IMiddleware;
+use Tiny\Interfaces\IHttpAllowedMethods;
 use Tiny\Libs\App;
 use Tiny\Interfaces\IRequest;
 use Tiny\Interfaces\IResponse;
@@ -32,6 +30,10 @@ $app->get('/api/{name}/world', function(IRequest $req, IResponse $res){
     $res->json(["user" => [ 'username'=> $req->getPathParam('name')] ]);
 });
 
+// $app->get('/api/v1/admin', function(IRequest $req, IResponse $res){
+//     $res->json(["authorized" => "User"]);
+// }, [$authMiddleware]);
+
 $app->put('/api/admin', function(IRequest $req, IResponse $res){
     $res->json(["res" => trim("/api/", '/')]);
 }, [$authMiddleware]);
@@ -45,9 +47,18 @@ $app->post('/api/post', function(IRequest $req, IResponse $res){
     $res->json($req->body);
 });
 
-$app->group('api/admin', function($group){
-    $group->get('/', function($req, $res){}, [$middlewares]);
-}, [$middlewares]);
+$app->group('api/v1/', function(IHttpAllowedMethods $group) use ($authMiddleware){
+
+    $group->get('/admin', function(IRequest $req, IResponse $res){
+        $res->json(['admin'=>'Inner route']);
+    }, [$authMiddleware]);
+
+    $group->get('/admin/john', function(IRequest $req, IResponse $res){
+        $res->json(['admin'=>'unprotected Inner route']);
+    });
+    
+
+});
 
 
 $app->start();
