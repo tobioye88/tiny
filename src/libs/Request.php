@@ -27,23 +27,14 @@ class Request implements IRequest {
         $this->method = $_SERVER['REQUEST_METHOD'] ?? '';
         $this->contentType = $_SERVER["CONTENT_TYPE"] ?? '';
         $this->queryParameters = $_GET;
-        // $this->body = $_POST;
         $this->files = $_FILES;
         $this->body = $this->parseBody();
-        // print_r(getallheaders());
         $this->headers =  apache_request_headers();
-
-        if ('PUT' === $this->method) {
-            parse_str(file_get_contents('php://input'), $_PUT);
-            // var_dump($_PUT); //$_PUT contains put fields 
-        }else if ('DELETE' === $this->method) {
-            parse_str(file_get_contents('php://input'), $_DELETE);
-            // var_dump($_DELETE);
-        }
     }
 
 
-    public function getQueryParam(String $name, $default = null){
+    public function getQueryParam(String $name, $default = null)
+    {
         return $this->queryParameters[$name] ?? $default;
     }
     
@@ -52,7 +43,8 @@ class Request implements IRequest {
         return $this->queryParameters;
     }
 
-    public function getPathParam(String $name, $default = null){
+    public function getPathParam(String $name, $default = null)
+    {
         return $this->pathParameters[$name] ?? $default;
     }
 
@@ -66,7 +58,8 @@ class Request implements IRequest {
         $this->pathParameters = $pathParams;
     }
     
-    public function getUrl(){
+    public function getUrl()
+    {
         return $this->url;
     }
     
@@ -86,17 +79,22 @@ class Request implements IRequest {
         }";
     }
 
-    public function parseBody($inArray = false){
+    public function parseBody()
+    {
+        $res = $_POST;
         $inputJSON = file_get_contents('php://input');
-        return json_decode($inputJSON, $inArray);
+        $raw = json_decode($inputJSON, false);
+        return (object) array_merge((array) $res, (array) $raw);
         
     }
 
-    public function getHeader(String $name){
+    public function getHeader(String $name)
+    {
         return $this->headers[$name];
     }
 
-    public function getHeaders(){
+    public function getHeaders()
+    {
         return $this->headers;
     }
 }

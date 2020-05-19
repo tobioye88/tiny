@@ -33,9 +33,9 @@ class App implements IHttpAllowedMethods {
 
     public function __construct()
     {
-        // set_exception_handler(function($exception) {
-        //     HttpErrorHandler::handle($exception);
-        // });
+        set_exception_handler(function($exception) {
+            HttpErrorHandler::handle($exception);
+        });
     }
 
     public function addMiddleWare(IMiddleware $middleware){
