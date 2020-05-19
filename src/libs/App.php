@@ -19,7 +19,7 @@ use Tiny\Interfaces\IMiddleware;
  * }, [middlewares]); 
  */
 class App implements IHttpAllowedMethods {
-    public const BASE_PATH = __DIR__ . "/../..";
+    public const BASE_PATH = __DIR__ . "/../../view/";
     private $callback;
     private $globalMiddleWare = [];
     private $routMiddleWare = [];

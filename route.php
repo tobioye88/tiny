@@ -22,10 +22,6 @@ return function ($app) use ($authMiddleware) {
         $res->json(["user" => ['username' => $req->getPathParam('name')]]);
     });
 
-    // $app->get('/api/v1/admin', function(IRequest $req, IResponse $res){
-    //     $res->json(["authorized" => "User"]);
-    // }, [$authMiddleware]);
-
     $app->put('/api/admin', function (IRequest $req, IResponse $res) {
         $res->json(["res" => trim("/api/", '/'), "body"=> $req->body]);
     }, [$authMiddleware]);
@@ -35,11 +31,10 @@ return function ($app) use ($authMiddleware) {
     });
 
     $app->get('/home', function (IRequest $req, IResponse $res) {
-        $res->view('/view/index.php', "Hello World");
+        $res->view('index.php', "Hello World");
     });
 
     $app->post('/api/post', function (IRequest $req, IResponse $res) {
-        // $req->body
         $res->json($req->body);
     });
 

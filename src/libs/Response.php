@@ -4,6 +4,7 @@
 namespace Tiny\Libs;
 
 use Tiny\exceptions\FileNotFoundException;
+use Tiny\exceptions\ViewNotFoundException;
 use Tiny\Interfaces\IResponse;
 
 class Response implements IResponse {
@@ -16,8 +17,12 @@ class Response implements IResponse {
 
     public function view($path, $extra = null){
         HttpHeader::setContentType("html");
-        $path = rtrim($path, ".php");
-        require_once App::BASE_PATH . $path . ".php";
+        $path = preg_replace("(\.php)", "", $path);
+        if(is_file(App::BASE_PATH . $path . ".php")){
+            require_once App::BASE_PATH . $path . ".php";
+        }else{
+            throw new ViewNotFoundException("View not found.");
+        }
     }
 
     public function file($path){
@@ -54,5 +59,10 @@ class Response implements IResponse {
     public function text($body){
         header('Content-type: text/plain; charset=utf-8');
         // echo 
+    }
+
+    public function setCookies(String $name, String $value): void
+    {
+        Cookie::set($name, $value);
     }
 }

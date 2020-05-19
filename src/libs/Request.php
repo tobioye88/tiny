@@ -97,4 +97,34 @@ class Request implements IRequest {
     {
         return $this->headers;
     }
+
+    public function setCookies(String $name, $value)
+    {
+        return Cookie::set($name, $value);
+    }
+
+    public function getCookies(String $name)
+    {
+        return Cookie::get($name);
+    }
+
+    public function destroyCookies(String $name)
+    {
+        return Cookie::destroy($name);
+    }
+
+    public function setSession(String $name, $value)
+    {
+        Session::set($name, $value);
+    }
+    
+    public function getSession(String $name)
+    {
+        return Session::get($name);
+    }
+
+    public function destroySession(String $name)
+    {
+        return Session::destroy($name);
+    }
 }

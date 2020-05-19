@@ -8,8 +8,10 @@ interface IResponse {
 
     public function json($body, $statusCode=200);
 
-    public function view($path, $extra);
+    public function view($path, $extra=null);
 
     public function file($path);
+
+    public function setCookies(String $name, String $value);
 
 }
