@@ -1,7 +1,7 @@
 <?php
-namespace Tiny\Libs;
+namespace tiny\libs;
 
-use Tiny\Interfaces\IHttpAllowedMethods;
+use tiny\interfaces\IHttpAllowedMethods;
 
 class Group implements IHttpAllowedMethods {
     private $routeMiddleWare = [];

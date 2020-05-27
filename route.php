@@ -1,9 +1,9 @@
 <?php
 
-use Tiny\Interfaces\IHttpAllowedMethods;
-use Tiny\Interfaces\IRequest;
-use Tiny\Interfaces\IResponse;
-use Tiny\middlewares\Auth;
+use tiny\interfaces\IHttpAllowedMethods;
+use tiny\interfaces\IRequest;
+use tiny\interfaces\IResponse;
+use tiny\middlewares\Auth;
 
 $authMiddleware = new Auth();
 
@@ -31,7 +31,7 @@ return function ($app) use ($authMiddleware) {
     });
 
     $app->get('/home', function (IRequest $req, IResponse $res) {
-        $res->view('index.php', "Hello World");
+        $res->view('index.php', ["Hello World"]);
     });
 
     $app->post('/api/post', function (IRequest $req, IResponse $res) {

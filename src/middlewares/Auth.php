@@ -1,17 +1,22 @@
 <?php
 
-namespace Tiny\middlewares;
+namespace tiny\middlewares;
 
-use Tiny\exceptions\HttpUnauthorizedException;
-use Tiny\Interfaces\IMiddleware;
-use Tiny\Interfaces\IRequest;
-use Tiny\Interfaces\IResponse;
+use app\libs\Auth as LibsAuth;
+use app\libs\JWT;
+use tiny\exceptions\HttpUnauthorizedException;
+use tiny\interfaces\IMiddleware;
+use tiny\interfaces\IRequest;
+use tiny\interfaces\IResponse;
 
 class Auth implements IMiddleware {
     public function handle(IRequest &$req, IResponse &$res){
-        $token = $req->getHeader('token');
-        if(!isset($token)){
-            throw new HttpUnauthorizedException("Unauthorized Request");
+        $token = $req->getSession('token');
+
+        if(!isset($token) || !JWT::verify($token, JWT_SECRET) || !LibsAuth::user('account_type') == "BASIC"){
+            // throw new HttpUnauthorizedException("Unauthorized Request");
+            $req->destroySession("token");
+            $res->redirect('/login');
         }
     }
 }

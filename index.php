@@ -8,7 +8,7 @@ spl_autoload_register(function ($fullClassName) {
 
 $route = require "./route.php";
 
-use Tiny\Libs\App;
+use tiny\Libs\App;
 
 $app = new App;
 

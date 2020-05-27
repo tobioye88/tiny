@@ -1,9 +1,10 @@
 <?php
 
 
-namespace Tiny\Libs;
+namespace tiny\libs;
 
-use Tiny\Interfaces\IRequest;
+use app\libs\File;
+use tiny\interfaces\IRequest;
 
 class Request implements IRequest {
     public $url = "";
@@ -90,7 +91,7 @@ class Request implements IRequest {
 
     public function getHeader(String $name)
     {
-        return $this->headers[$name];
+        return $this->headers[$name] ?? null;
     }
 
     public function getHeaders()
@@ -123,8 +124,35 @@ class Request implements IRequest {
         return Session::get($name);
     }
 
-    public function destroySession(String $name)
+    public function destroySession($name)
     {
-        return Session::destroy($name);
+        Session::destroy($name);
     }
+
+    public function uploadFile(string $destination, $fieldName): bool
+    {
+        // return File::set($destination, $fieldName)->upload()->errors();
+        return false;
+    }
+
+    public function file($fileName)
+    {
+        return $this->files[$fileName];
+    }
+
+    public function fileSize($fileName)
+    {
+        return $this->files[$fileName]["size"]; 
+    }
+
+    public function fileName($fileName)
+    {
+        return $this->files[$fileName]["name"];
+    }
+    
+    public function fileType($fileName)
+    {
+        return $this->files[$fileName]["type"]; ;
+    }
+
 }

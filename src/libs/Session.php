@@ -1,5 +1,5 @@
 <?php
-namespace Tiny\Libs;
+namespace tiny\libs;
 
 class Session
 {
@@ -30,10 +30,11 @@ class Session
 
 	public static function destroy($key=null, $main='app')
 	{
-		if (isset($_SESSION[$main][$key]))
+		if (isset($_SESSION[$main][$key])){
 			unset($_SESSION[$main][$key]);
-		elseif($key === true)
+		}elseif($key === true){
 			unset($_SESSION[$main]);
+		}
 	}
 	
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tiny\Interfaces;
+namespace tiny\interfaces;
 
 interface IRequest {
 
@@ -33,6 +33,16 @@ interface IRequest {
 
     public function setSession(String $name, $value);
     
-    public function destroySession(String $name);
+    public function destroySession($name);
+
+    public function uploadFile(string $destination, $fieldName): bool;
+
+    public function file($fileName);
+
+    public function fileSize($fileName);
+
+    public function fileName($fileName);
+    
+    public function fileType($fileName);
 
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tiny\exceptions;
+namespace tiny\exceptions;
 use Exception;
 
 class HttpException extends Exception {

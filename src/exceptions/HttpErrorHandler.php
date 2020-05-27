@@ -1,10 +1,12 @@
 <?php
 
-namespace Tiny\exceptions;
+namespace tiny\exceptions;
 
 use Exception;
 use Throwable;
-use Tiny\Libs\HttpHeader;
+use tiny\Libs\App;
+use tiny\Libs\HttpHeader;
+use tiny\Libs\Request;
 
 class HttpErrorHandler {
 
@@ -55,8 +57,20 @@ class HttpErrorHandler {
                 'description' => $description,
             ],
         ];
-        HttpHeader::setStatusCode($statusCode);
-        HttpHeader::setContentType('json');
-        echo json_encode($error, JSON_PRETTY_PRINT);
+        $mimeType = (new Request)->getHeader('Accept');
+        switch ($mimeType) {
+            case HttpHeader::getMimeType('json'):
+                HttpHeader::setStatusCode($statusCode);
+                HttpHeader::setContentType('json');
+                echo json_encode($error, JSON_PRETTY_PRINT);
+                return;
+                break;
+            
+            default:
+                HttpHeader::setStatusCode($statusCode);
+                HttpHeader::setContentType('html');
+                App::errorView($description) ?? App::defaultErrorView($description);
+                break;
+        }
     }
 }

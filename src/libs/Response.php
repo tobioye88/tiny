@@ -1,11 +1,11 @@
 <?php
 
 
-namespace Tiny\Libs;
+namespace tiny\libs;
 
-use Tiny\exceptions\FileNotFoundException;
-use Tiny\exceptions\ViewNotFoundException;
-use Tiny\Interfaces\IResponse;
+use tiny\exceptions\FileNotFoundException;
+use tiny\exceptions\ViewNotFoundException;
+use tiny\interfaces\IResponse;
 
 class Response implements IResponse {
     // header('Access-Control-Allow-Origin: *');
@@ -15,11 +15,11 @@ class Response implements IResponse {
         return $this;
     }
 
-    public function view($path, $extra = null){
+    public function view($path, array $extra=[]){
         HttpHeader::setContentType("html");
         $path = preg_replace("(\.php)", "", $path);
-        if(is_file(App::BASE_PATH . $path . ".php")){
-            require_once App::BASE_PATH . $path . ".php";
+        if(is_file(App::VIEW_PATH . $path . ".php")){
+            require_once App::VIEW_PATH . $path . ".php";
         }else{
             throw new ViewNotFoundException("View not found.");
         }
@@ -61,8 +61,20 @@ class Response implements IResponse {
         // echo 
     }
 
-    public function setCookies(String $name, String $value): void
+    public function setCookies(string $name, String $value): void
     {
         Cookie::set($name, $value);
+    }
+
+
+    public function redirect(string $path)
+    {
+        self::goTo($path);
+    }
+
+    public static function goTo(string $path): void
+    {
+        header('Location: ' . $path);
+		exit();
     }
 }

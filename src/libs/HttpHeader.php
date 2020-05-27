@@ -1,6 +1,6 @@
 <?php
 
-namespace Tiny\Libs;
+namespace tiny\libs;
 
 class HttpHeader {
 
@@ -18,7 +18,7 @@ class HttpHeader {
             'php' => 'text/html',
             'css' => 'text/css',
             'js' => 'application/javascript',
-            'json' => 'application/json; charset=utf-8',
+            'json' => 'application/json',
             'xml' => 'application/xml',
             'swf' => 'application/x-shockwave-flash',
             'flv' => 'video/x-flv',

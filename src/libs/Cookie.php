@@ -1,5 +1,5 @@
 <?php
-namespace Tiny\Libs;
+namespace tiny\libs;
 
 class Cookie {
 	
