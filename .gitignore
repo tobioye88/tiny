@@ -1,0 +1,11 @@
+/.vscode
+/.idea
+error_log
+__MACOSX
+*/uploads/**
+
+logs/
+*/logs/*
+
+.DS_Store
+*/contest/*
