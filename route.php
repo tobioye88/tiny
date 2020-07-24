@@ -14,7 +14,7 @@ return function ($app) use ($authMiddleware) {
         $res->json(["GREETINGS" => "/"]);
     });
 
-    $app->get('/api/{name}', function (IRequest $req, IResponse $res) {
+    $app->any('/api/{name}', function (IRequest $req, IResponse $res) {
         $res->json(["GREETINGS" => $req->getPathParam('name')]);
     });
 

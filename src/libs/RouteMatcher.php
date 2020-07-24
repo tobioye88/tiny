@@ -5,17 +5,20 @@ namespace tiny\libs;
 use Exception;
 
 class RouteMatcher {
-    private static $KEY_PATTERN = "/\{(\w+)\}+?/";
-    private static $REPLACE_PATTERN = "([\w@\.\-]+)";
-    public $pathParams = [];
+    private static string $PATH_NAME_PATTERN = "/\{(\w+)\}+?/"; // used to match path variables api/{name}
+//    private static string $PATH_NAME_PATTERN = "/\{(\w|\d|\s)+\}+?/";
+//    private static string $PATH_VARIABLE_PATTERN = "([\w\@\S\s\.]+)";
+    private static string $PATH_VARIABLE_PATTERN = "([\w@\.\-\s\_]+)";
+    public array $pathParams = [];
 
     // private function __construct(){}
 
     public function match(String $appRoute, String $httpRoute): bool {
         // does this route match 
-        if(self::routeContainsPathParams($appRoute) && self::routeWithPathParamsEquals($appRoute, $httpRoute)){
+        if(self::routeEquals($appRoute, $httpRoute)){
             return true;
-        }else if(self::routeEquals($appRoute, $httpRoute)){
+        }
+        if(self::routeContainsPathParams($appRoute) && self::routeWithPathParamsEquals($appRoute, $httpRoute)){
             return true;
         }
         return false;
@@ -25,15 +28,14 @@ class RouteMatcher {
         $appRoute = trim($appRoute, "/");
         $httpRoute = trim($httpRoute, "/");
         
-        preg_match_all(self::$KEY_PATTERN, $appRoute, $keys);
-        // print_r($keys);
+        preg_match_all(self::$PATH_NAME_PATTERN, $appRoute, $keys);
 
-
-        $appRoute = preg_replace(self::$KEY_PATTERN, self::$REPLACE_PATTERN, trim($appRoute, "/"));
+        $appRoute = preg_replace(self::$PATH_NAME_PATTERN, self::$PATH_VARIABLE_PATTERN, trim($appRoute, "/"));
         $pattern = "(".$appRoute.")";
 
-        $result = preg_match($pattern, $httpRoute, $matches);
+        $result = preg_match($pattern, urldecode($httpRoute), $matches);
         array_shift($matches);
+        $matches = array_map(fn($match) => $match, $matches);
         $this->setPathParams($keys, $matches);
 
         return (!!$result && substr_count($httpRoute, '/') == substr_count($appRoute, '/'));
@@ -44,7 +46,7 @@ class RouteMatcher {
     }
 
     public function routeContainsPathParams(String $appRoute): bool {
-        return preg_match(self::$KEY_PATTERN, $appRoute);
+        return preg_match(self::$PATH_NAME_PATTERN, $appRoute);
     }
 
     public function setPathParams(array $keys, array $matches): void {
@@ -53,11 +55,6 @@ class RouteMatcher {
                 $this->pathParams[$keys[1][$key]] = $match;
             }
         }
-    }
-
-    public function matchCurrentRoute(): bool {
-        //TODO: implement method
-        throw new Exception("Method not implemented yet!");
     }
 }
 

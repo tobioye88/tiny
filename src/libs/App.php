@@ -15,19 +15,19 @@ use tiny\interfaces\IMiddleware;
 /**
  * $app->get('/', function(req, res){}, middleware)
  * $app->group('/', function($group){
- *      $group->get('', function($req, $res){}, [$middlewares])
- * }, [middlewares]); 
+ *      $group->get('', function($req, $res){}, [middleware])
+ * }, [middleware]); 
  */
 class App implements IHttpAllowedMethods {
     public const VIEW_PATH = __DIR__ . "/../../view/";
     public const BASE_PATH = __DIR__ . "/../../";
     
-    private static $defaultErrorView;
+    private static string $defaultErrorView = "";
     private $callback;
-    private $globalMiddleWare = [];
-    private $routMiddleWare = [];
+    private array $globalMiddleWare = [];
+    private array $routMiddleWare = [];
 
-    private $register = [
+    private array $register = [
         "GET" => [],
         "POST" => [],
         "PUT" => [],
@@ -82,11 +82,11 @@ class App implements IHttpAllowedMethods {
         }
     }
 
-    public function group(String $prefix, callable $callback, array $middlewares = []){
+    public function group(String $prefix, callable $callback, array $middleware = []){
         $group = new Group();
         $callback($group);
         $groupRoutes = $group->getRoutes($prefix);
-        $groupMiddleware = $group->getMiddlewares($prefix, $middlewares);
+        $groupMiddleware = $group->getMiddlewares($prefix, $middleware);
         $this->register['GET'] = array_merge($this->register['GET'], $groupRoutes['GET']);
         $this->register['POST'] = array_merge($this->register['POST'], $groupRoutes['POST']);
         $this->register['PUT'] = array_merge($this->register['PUT'], $groupRoutes['PUT']);
@@ -94,29 +94,32 @@ class App implements IHttpAllowedMethods {
         $this->routMiddleWare = array_merge($this->routMiddleWare, $groupMiddleware);
     }
 
-    public function get(String $route, callable $callback, array $middlewares = []){
-        $this->routMiddleWare[trim($route, "/")] = $middlewares;
+    public function get(String $route, callable $callback, array $middleware = []){
+        $this->routMiddleWare[trim($route, "/")] = $middleware;
         $this->register['GET'][trim($route, "/")] = $callback;
     }
 
-    public function post(String $route, callable $callback, array $middlewares = []){
-        $this->routMiddleWare[trim($route, "/")] = $middlewares;
+    public function post(String $route, callable $callback, array $middleware = []){
+        $this->routMiddleWare[trim($route, "/")] = $middleware;
         $this->register['POST'][trim($route, "/")] = $callback; 
     }
 
-    public function put(String $route, callable $callback, array $middlewares = []){
-        $this->routMiddleWare[trim($route, "/")] = $middlewares;
+    public function put(String $route, callable $callback, array $middleware = []){
+        $this->routMiddleWare[trim($route, "/")] = $middleware;
         $this->register['PUT'][trim($route, "/")] = $callback; 
     }
 
-    public function delete(String $route, callable $callback, array $middlewares = []){
-        $this->routMiddleWare[trim($route, "/")] = $middlewares;
+    public function delete(String $route, callable $callback, array $middleware = []){
+        $this->routMiddleWare[trim($route, "/")] = $middleware;
         $this->register['DELETE'][trim($route, "/")] = $callback; 
     }
 
-    public function any(String $route, callable $callback, array $middlewares = []){
-        $this->routMiddleWare[trim($route, "/")] = $middlewares;
-        throw new HttpNotImplementedException("Method not Implemented"); //TODO
+    public function any(String $route, callable $callback, array $middleware = []){
+        $route = trim($route, "/");
+        $this->routMiddleWare[$route] = $middleware;
+        foreach ($this->register as $key => $value){
+            $this->register[$key][$route] = $callback;
+        }
     }
 
     public function hasRoute(String $url, $method, IRequest &$req): bool {
@@ -133,12 +136,12 @@ class App implements IHttpAllowedMethods {
         return false;
     }
 
-    public function options(String $route, callable $callback, array $middlewares = []){
-        $this->routMiddleWare[trim($route, "/")] = $middlewares;
+    public function options(String $route, callable $callback, array $middleware = []){
+        $this->routMiddleWare[trim($route, "/")] = $middleware;
     }
     
-    public function patch(String $route, callable $callback, array $middlewares = []){
-        $this->routMiddleWare[trim($route, "/")] = $middlewares;
+    public function patch(String $route, callable $callback, array $middleware = []){
+        $this->routMiddleWare[trim($route, "/")] = $middleware;
     }
 
 
@@ -201,16 +204,18 @@ class App implements IHttpAllowedMethods {
 
     public static function errorView($errorMessage)
     {
-        if(App::$defaultErrorView == null){
+        if(App::$defaultErrorView == null || App::$defaultErrorView == ""){
             return null;
         }
 
         if(is_file(App::$defaultErrorView)){
             include App::$defaultErrorView;
+        }else {
+            throw new ResourceNotFound("Path to custom error message was not found");
         }
     }
 
-    public function addDefaultErrorPage(String $path): void
+    public function addDefaultErrorPage(string $path): void
     {
         self::$defaultErrorView = $path;
     }
