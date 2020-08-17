@@ -3,14 +3,12 @@
 namespace tiny\libs;
 
 use Exception;
-use tiny\exceptions\HttpBadRequestException;
-use tiny\exceptions\HttpErrorHandler;
-use tiny\exceptions\HttpMethodNotAllowedException;
-use tiny\exceptions\HttpNotImplementedException;
-use tiny\exceptions\ResourceNotFound;
-use tiny\interfaces\IHttpAllowedMethods;
 use tiny\interfaces\IRequest;
 use tiny\interfaces\IMiddleware;
+use tiny\exceptions\HttpErrorHandler;
+use tiny\exceptions\ResourceNotFound;
+use tiny\exceptions\HttpBadRequestException;
+use tiny\exceptions\HttpMethodNotAllowedException;
 
 /**
  * $app->get('/', function(req, res){}, middleware)
@@ -18,26 +16,18 @@ use tiny\interfaces\IMiddleware;
  *      $group->get('', function($req, $res){}, [middleware])
  * }, [middleware]); 
  */
-class App implements IHttpAllowedMethods {
-    public const VIEW_PATH = __DIR__ . "/../../view/";
+class App extends AbstractHttpMethods {
+    public const VIEW_PATH = __DIR__ . "/../../app/view/";
     public const BASE_PATH = __DIR__ . "/../../";
     
     private static string $defaultErrorView = "";
     private $callback;
     private array $globalMiddleWare = [];
-    private array $routMiddleWare = [];
-
-    private array $register = [
-        "GET" => [],
-        "POST" => [],
-        "PUT" => [],
-        "DELETE" => [],
-    ];
 
     public function __construct()
     {
         session_start();
-        date_default_timezone_set('Africa/Lagos');
+        date_default_timezone_set(DEFAULT_TIME_ZONE);
         set_exception_handler(function($exception) {
             HttpErrorHandler::handle($exception);
         });
@@ -86,45 +76,16 @@ class App implements IHttpAllowedMethods {
         $group = new Group();
         $callback($group);
         $groupRoutes = $group->getRoutes($prefix);
-        $groupMiddleware = $group->getMiddlewares($prefix, $middleware);
-        $this->register['GET'] = array_merge($this->register['GET'], $groupRoutes['GET']);
-        $this->register['POST'] = array_merge($this->register['POST'], $groupRoutes['POST']);
-        $this->register['PUT'] = array_merge($this->register['PUT'], $groupRoutes['PUT']);
-        $this->register['DELETE'] = array_merge($this->register['DELETE'], $groupRoutes['DELETE']);
-        $this->routMiddleWare = array_merge($this->routMiddleWare, $groupMiddleware);
-    }
+        $groupMiddleware = $group->getMiddleware($prefix, $middleware);
 
-    public function get(String $route, callable $callback, array $middleware = []){
-        $this->routMiddleWare[trim($route, "/")] = $middleware;
-        $this->register['GET'][trim($route, "/")] = $callback;
-    }
-
-    public function post(String $route, callable $callback, array $middleware = []){
-        $this->routMiddleWare[trim($route, "/")] = $middleware;
-        $this->register['POST'][trim($route, "/")] = $callback; 
-    }
-
-    public function put(String $route, callable $callback, array $middleware = []){
-        $this->routMiddleWare[trim($route, "/")] = $middleware;
-        $this->register['PUT'][trim($route, "/")] = $callback; 
-    }
-
-    public function delete(String $route, callable $callback, array $middleware = []){
-        $this->routMiddleWare[trim($route, "/")] = $middleware;
-        $this->register['DELETE'][trim($route, "/")] = $callback; 
-    }
-
-    public function any(String $route, callable $callback, array $middleware = []){
-        $route = trim($route, "/");
-        $this->routMiddleWare[$route] = $middleware;
         foreach ($this->register as $key => $value){
-            $this->register[$key][$route] = $callback;
+            $this->register[$key] = array_merge($this->register[$key], $groupRoutes[$key]);
         }
+        $this->routMiddleWare = array_merge($this->routMiddleWare, $groupMiddleware);
     }
 
     public function hasRoute(String $url, $method, IRequest &$req): bool {
         $matcher = new RouteMatcher();
-        // print_r($this->register[$method]);
         foreach ($this->register[$method] as $key => $value) {
             $result = $matcher->match($key, $url);
             if($result){
@@ -135,15 +96,6 @@ class App implements IHttpAllowedMethods {
         }
         return false;
     }
-
-    public function options(String $route, callable $callback, array $middleware = []){
-        $this->routMiddleWare[trim($route, "/")] = $middleware;
-    }
-    
-    public function patch(String $route, callable $callback, array $middleware = []){
-        $this->routMiddleWare[trim($route, "/")] = $middleware;
-    }
-
 
     public function cors(array $allowed_domains = []){
         if (isset($_SERVER['HTTP_ORIGIN']) && !in_array($_SERVER['HTTP_ORIGIN'], $allowed_domains)) {

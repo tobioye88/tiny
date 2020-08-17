@@ -4,6 +4,13 @@ namespace tiny\libs;
 
 class HttpHeader {
 
+    public static function setHeader(string $key, string $value): void
+    {
+        if(!empty($key) && !empty($value)){
+            header($key . ': ' . $value);
+        }
+    }
+
     public static function setContentType($type){
         if(!headers_sent()){
             header('Content-Type: ' . self::getMimeType(($type)));

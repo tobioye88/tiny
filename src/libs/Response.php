@@ -8,18 +8,27 @@ use tiny\exceptions\ViewNotFoundException;
 use tiny\interfaces\IResponse;
 
 class Response implements IResponse {
-    // header('Access-Control-Allow-Origin: *');
+    private $extra = [];
+
+    public function setExtra(array $extra): void
+    {
+        $this->extra = $extra;
+    }
 
     public function status(int $code){
         HttpHeader::setStatusCode($code);
         return $this;
     }
 
-    public function view($path, array $extra=[]){
+    public function view($_path, array $extra=[]){
+        foreach($extra as $key => $value){
+            $$key = $value;
+        }
+        $extra = array_merge($extra, $this->extra);
         HttpHeader::setContentType("html");
-        $path = preg_replace("(\.php)", "", $path);
-        if(is_file(App::VIEW_PATH . $path . ".php")){
-            require_once App::VIEW_PATH . $path . ".php";
+        $_path = preg_replace("(\.php)", "", $_path);
+        if(is_file(App::VIEW_PATH . $_path . ".php")){
+            require_once App::VIEW_PATH . $_path . ".php";
         }else{
             throw new ViewNotFoundException("View not found.");
         }
@@ -66,15 +75,32 @@ class Response implements IResponse {
         Cookie::set($name, $value);
     }
 
-
-    public function redirect(string $path)
+    public static function arrayToQueryParams(array $array): string
     {
-        self::goTo($path);
+        $queryString = "?";
+        $count = 0;
+        foreach($array as $key => $value){
+            $queryString .= $key . "=" . $value;
+            $queryString .= ($count++ < count($array) - 1) ? "&" : "";
+        }
+    
+        return ("?" == $queryString) ? "" : $queryString;
+    }
+
+    public function redirect(string $path, $queryParams = [])
+    {
+        self::goTo($path . self::arrayToQueryParams($queryParams));
+        exit();
     }
 
     public static function goTo(string $path): void
     {
         header('Location: ' . $path);
 		exit();
+    }
+
+    public function setHeader(string $key, string $value): void
+    {
+        HttpHeader::setHeader($key, $value);
     }
 }

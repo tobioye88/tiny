@@ -1,45 +1,7 @@
 <?php
 namespace tiny\libs;
 
-use tiny\interfaces\IHttpAllowedMethods;
-
-class Group implements IHttpAllowedMethods {
-    private array $routeMiddleWare = [];
-    private array $register = [
-        "GET" => [],
-        "POST" => [],
-        "PUT" => [],
-        "DELETE" => [],
-    ];
-
-    public function get(String $route, callable $callback, array $middleware = []){
-        $this->routeMiddleWare[trim($route, "/")] = $middleware;
-        $this->register['GET'][trim($route, "/")] = $callback;
-    }
-    public function post(String $route, callable $callback, array $middleware = []){
-        $this->routeMiddleWare[trim($route, "/")] = $middleware;
-        $this->register['POST'][trim($route, "/")] = $callback;
-    }
-    public function put(String $route, callable $callback, array $middleware = []){
-        $this->routeMiddleWare[trim($route, "/")] = $middleware;
-        $this->register['PUT'][trim($route, "/")] = $callback;
-    }
-    public function delete(String $route, callable $callback, array $middleware = []){
-        $this->routeMiddleWare[trim($route, "/")] = $middleware;
-        $this->register['DELETE'][trim($route, "/")] = $callback;
-    }
-    public function any(String $route, callable $callback, array $middleware = []){
-        $this->routeMiddleWare[trim($route, "/")] = $middleware;
-        $this->register['ANY'][trim($route, "/")] = $callback;
-    }
-    public function options(String $route, callable $callback, array $middleware = []){
-        $this->routeMiddleWare[trim($route, "/")] = $middleware;
-        $this->register['OPTIONS'][trim($route, "/")] = $callback;
-    }
-    public function patch(String $route, callable $callback, array $middleware = []){
-        $this->routeMiddleWare[trim($route, "/")] = $middleware;
-        $this->register['PATCH'][trim($route, "/")] = $callback;
-    }
+class Group extends AbstractHttpMethods {
 
     public function getRoutes(String $prefix)
     {
@@ -57,16 +19,16 @@ class Group implements IHttpAllowedMethods {
         return $this->register;
     }
 
-    public function getMiddlewares(String $prefix, array $middleware =[])
+    public function getMiddleware(String $prefix, array $middleware =[])
     {
-        $newRouteMiddlewares = [];
+        $newRouteMiddleware = [];
         foreach ($this->routeMiddleWare as $previousRoute => $callbackArray) {
             $newKey = trim($prefix, "/") . "/" . trim($previousRoute, "/");
             $newKey = trim($newKey, '/');
-            $newRouteMiddlewares[$newKey] = array_merge($middleware, $callbackArray);
+            $newRouteMiddleware[$newKey] = array_merge($middleware, $callbackArray);
         }
         unset($this->register);
-        return $newRouteMiddlewares;
+        return $newRouteMiddleware;
     }
 }
 

@@ -3,7 +3,7 @@
 
 namespace tiny\libs;
 
-use app\libs\File;
+use tiny\libs\File;
 use tiny\interfaces\IRequest;
 
 class Request implements IRequest {
@@ -21,10 +21,11 @@ class Request implements IRequest {
         $this->setUp();
     }
 
-    public function setUp()
+    private function setUp()
     {
         $url = $_GET['url'] ?? $_SERVER['REQUEST_URI'];
-        $this->url = preg_replace("/\?.*/", "", $url);
+        $this->url = str_replace(DIRECTORY_ROOT, "", $url);
+        $this->url = preg_replace("/\?.*/", "", $this->url);
         $this->method = $_SERVER['REQUEST_METHOD'] ?? '';
         $this->contentType = $_SERVER["CONTENT_TYPE"] ?? '';
         $this->queryParameters = $_GET;
@@ -39,7 +40,7 @@ class Request implements IRequest {
         return $this->queryParameters[$name] ?? $default;
     }
     
-    public function getQueryParams()
+    public function getQueryParams(): array
     {
         return $this->queryParameters;
     }
@@ -129,10 +130,13 @@ class Request implements IRequest {
         Session::destroy($name);
     }
 
-    public function uploadFile(string $destination, $fieldName): bool
+    public function uploadFile(string $destination, $fieldName, $newName=null): bool
     {
-        // return File::set($destination, $fieldName)->upload()->errors();
-        return false;
+        $file = File::set($destination, $fieldName);
+        if($newName)
+            $file->rename($newName);
+        $file->upload();
+        return $file->errors();
     }
 
     public function file($fileName)
@@ -153,6 +157,11 @@ class Request implements IRequest {
     public function fileType($fileName)
     {
         return $this->files[$fileName]["type"]; ;
+    }
+
+    public function acceptJson()
+    {
+        return HttpHeader::getMimeType('json') == $this->getHeader('Accept');
     }
 
 }

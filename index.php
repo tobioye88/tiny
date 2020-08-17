@@ -6,7 +6,14 @@ spl_autoload_register(function ($fullClassName) {
 	require $fullClassName . '.php';
 });
 
-$route = require "./route.php";
+//global config
+require "./app/config.php";
+
+//global functions
+require "./app/functions.php";
+
+//get sample routes
+$route = require "./app/routes/route.php";
 
 use tiny\Libs\App;
 

@@ -7,7 +7,7 @@ interface IRequest {
     
     public function getQueryParam(String $name, $default = null);
     
-    public function getQueryParams();
+    public function getQueryParams(): array;
     
     public function getPathParam(String $name, $default = null);
     
@@ -35,7 +35,7 @@ interface IRequest {
     
     public function destroySession($name);
 
-    public function uploadFile(string $destination, $fieldName): bool;
+    public function uploadFile(string $destination, string $fieldName, $newName=null): bool;
 
     public function file($fileName);
 
@@ -44,5 +44,7 @@ interface IRequest {
     public function fileName($fileName);
     
     public function fileType($fileName);
+
+    public function acceptJson();
 
 }
