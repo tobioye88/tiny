@@ -13,45 +13,46 @@ abstract class AbstractHttpMethods implements IHttpAllowedMethods
         "PUT" => [],
         "PATCH" => [],
         "DELETE" => [],
+        "OPTION" => [],
     ];
 
-    public function get(String $route, callable $callback, array $middleware = []){
+    public function get(string $route, callable $callback, array $middleware = []){
         $route = trim($route, "/");
-        $this->routMiddleWare[$route] = $middleware;
+        $this->routeMiddleWare[$route] = $middleware;
         $this->register['GET'][$route] = $callback;
     }
 
-    public function post(String $route, callable $callback, array $middleware = []){
+    public function post(string $route, callable $callback, array $middleware = []){
         $route = trim($route, "/");
-        $this->routMiddleWare[$route] = $middleware;
+        $this->routeMiddleWare[$route] = $middleware;
         $this->register['POST'][$route] = $callback; 
     }
 
-    public function put(String $route, callable $callback, array $middleware = []){
+    public function put(string $route, callable $callback, array $middleware = []){
         $route = trim($route, "/");
-        $this->routMiddleWare[$route] = $middleware;
+        $this->routeMiddleWare[$route] = $middleware;
         $this->register['PUT'][$route] = $callback; 
     }
 
-    public function patch(String $route, callable $callback, array $middleware = []){
+    public function patch(string $route, callable $callback, array $middleware = []){
         $route = trim($route, "/");
-        $this->routMiddleWare[$route] = $middleware;
+        $this->routeMiddleWare[$route] = $middleware;
         $this->register['PATCH'][$route] = $callback; 
     }
 
-    public function delete(String $route, callable $callback, array $middleware = []){
+    public function delete(string $route, callable $callback, array $middleware = []){
         $route = trim($route, "/");
-        $this->routMiddleWare[$route] = $middleware;
+        $this->routeMiddleWare[$route] = $middleware;
         $this->register['DELETE'][$route] = $callback; 
     }
 
-    public function options(String $route, callable $callback, array $middleware = []){
-        $this->routMiddleWare[trim($route, "/")] = $middleware;
+    public function options(string $route, callable $callback, array $middleware = []){
+        $this->routeMiddleWare[trim($route, "/")] = $middleware;
     }
 
-    public function any(String $route, callable $callback, array $middleware = []){
+    public function any(string $route, callable $callback, array $middleware = []){
         $route = trim($route, "/");
-        $this->routMiddleWare[$route] = $middleware;
+        $this->routeMiddleWare[$route] = $middleware;
         foreach ($this->register as $key => $value){
             $this->register[$key][$route] = $callback;
         }

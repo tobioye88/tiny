@@ -42,7 +42,7 @@ abstract class Entity implements IEntity, JsonSerializable
             $this->id = DB::ins()->insert($tableName, $params)->getLastId();
         }
 
-        return $this->build($this);
+        return self::build(DB::ins()->find($this->tableName, ["conditions" => ["id", "=", $this->id]])->first(), $this);
     }
 
 

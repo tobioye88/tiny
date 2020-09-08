@@ -12,9 +12,9 @@ interface IResponse {
 
     public function file($path);
 
-    public function setCookies(String $name, String $value);
+    public function setCookies(string $name, string $value);
 
-    public function redirect(String $path, $queryParams = []);
+    public function redirect(string $path, $queryParams = []);
 
     public function setHeader(string $key, string $value): void;
 

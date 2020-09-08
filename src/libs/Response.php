@@ -70,7 +70,7 @@ class Response implements IResponse {
         // echo 
     }
 
-    public function setCookies(string $name, String $value): void
+    public function setCookies(string $name, string $value): void
     {
         Cookie::set($name, $value);
     }

@@ -7,12 +7,13 @@ use tiny\libs\File;
 use tiny\interfaces\IRequest;
 
 class Request implements IRequest {
-    public $url = "";
-    public $method = "";
-    public $contentType = "";
-    public $queryParameters = [];
-    public $pathParameters = [];
+    public string $url = "";
+    public string $method = "";
+    public string $contentType = "";
+    public array $queryParameters = [];
+    public array $pathParameters = [];
     public $body;
+    public $data;
     private $headers;
 
 
@@ -35,7 +36,7 @@ class Request implements IRequest {
     }
 
 
-    public function getQueryParam(String $name, $default = null)
+    public function getQueryParam(string $name, $default = null)
     {
         return $this->queryParameters[$name] ?? $default;
     }
@@ -45,7 +46,7 @@ class Request implements IRequest {
         return $this->queryParameters;
     }
 
-    public function getPathParam(String $name, $default = null)
+    public function getPathParam(string $name, $default = null)
     {
         return $this->pathParameters[$name] ?? $default;
     }
@@ -72,12 +73,12 @@ class Request implements IRequest {
 
     public function __toString()
     {
-        return "Request {
-            method: $this->method,
-            contentType: $this->contentType,
-            url: $this->url,
-            queryParameters: " . count($this->queryParameters) ."
-            pathParameters: " . count($this->pathParameters) ."
+        return "Request {\n
+            method: $this->method,\n
+            contentType: $this->contentType,\n
+            url: $this->url,\n
+            queryParameters: [" . implode(',', $this->queryParameters) ."]\n
+            pathParameters: [" . implode(',', $this->pathParameters) ."]\n
         }";
     }
 
@@ -90,7 +91,7 @@ class Request implements IRequest {
         
     }
 
-    public function getHeader(String $name)
+    public function getHeader(string $name)
     {
         return $this->headers[$name] ?? null;
     }
@@ -100,27 +101,27 @@ class Request implements IRequest {
         return $this->headers;
     }
 
-    public function setCookies(String $name, $value)
+    public function setCookies(string $name, $value)
     {
         return Cookie::set($name, $value);
     }
 
-    public function getCookies(String $name)
+    public function getCookies(string $name)
     {
         return Cookie::get($name);
     }
 
-    public function destroyCookies(String $name)
+    public function destroyCookies(string $name)
     {
         return Cookie::destroy($name);
     }
 
-    public function setSession(String $name, $value)
+    public function setSession(string $name, $value)
     {
         Session::set($name, $value);
     }
     
-    public function getSession(String $name)
+    public function getSession(string $name)
     {
         return Session::get($name);
     }

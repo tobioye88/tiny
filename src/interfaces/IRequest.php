@@ -5,11 +5,11 @@ namespace tiny\interfaces;
 interface IRequest {
 
     
-    public function getQueryParam(String $name, $default = null);
+    public function getQueryParam(string $name, $default = null);
     
     public function getQueryParams(): array;
     
-    public function getPathParam(String $name, $default = null);
+    public function getPathParam(string $name, $default = null);
     
     public function getPathParams();
     
@@ -19,19 +19,19 @@ interface IRequest {
     
     public function setPathParams($pathParams);
     
-    public function getHeader(String $name);
+    public function getHeader(string $name);
     
     public function getHeaders();
     
-    public function setCookies(String $name, $value);
+    public function setCookies(string $name, $value);
 
-    public function getCookies(String $name);
+    public function getCookies(string $name);
     
-    public function destroyCookies(String $name);
+    public function destroyCookies(string $name);
 
-    public function getSession(String $name);
+    public function getSession(string $name);
 
-    public function setSession(String $name, $value);
+    public function setSession(string $name, $value);
     
     public function destroySession($name);
 

@@ -3,7 +3,7 @@ namespace tiny\libs;
 
 class Group extends AbstractHttpMethods {
 
-    public function getRoutes(String $prefix)
+    public function getRoutes(string $prefix)
     {
         foreach ($this->register as $method => $routesArray) {
             $newMethod[$method] = [];
@@ -19,7 +19,7 @@ class Group extends AbstractHttpMethods {
         return $this->register;
     }
 
-    public function getMiddleware(String $prefix, array $middleware =[])
+    public function getMiddleware(string $prefix, array $middleware =[])
     {
         $newRouteMiddleware = [];
         foreach ($this->routeMiddleWare as $previousRoute => $callbackArray) {

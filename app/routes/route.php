@@ -4,6 +4,7 @@ use tiny\interfaces\IHttpAllowedMethods;
 use tiny\interfaces\IRequest;
 use tiny\interfaces\IResponse;
 use app\middleware\Auth;
+use app\middleware\SampleMiddleware;
 
 $authMiddleware = new Auth();
 
@@ -52,5 +53,22 @@ return function ($app) use ($authMiddleware) {
         $group->post('/admin', function (IRequest $req, IResponse $res) {
             $res->json(['admin' => 'unprotected Post Inner route']);
         });
+    });
+
+    $app->group('api/v2/{name}', function (IHttpAllowedMethods $group) use ($authMiddleware) {
+
+        $group->get('/special', function (IRequest $req, IResponse $res) {
+            $res->json([
+                'special' => 'Inner route',
+                'name' => $req->getPathParam('name'),
+            ]);
+        });//, [$authMiddleware]);
+
+        $group->get('', function (IRequest $req, IResponse $res) {
+            $res->json([
+                'special' => 'Inner route',
+            ]);
+        });
+
     });
 };

@@ -23,6 +23,7 @@ class App extends AbstractHttpMethods {
     private static string $defaultErrorView = "";
     private $callback;
     private array $globalMiddleWare = [];
+    private array $currentMiddleware = [];
 
     public function __construct()
     {
@@ -59,7 +60,7 @@ class App extends AbstractHttpMethods {
             }
 
             if($this->hasRoute($url, $method, $req)){
-                $routeMiddleware = $this->routMiddleWare[trim($url, "/")] ?? [];
+                $routeMiddleware = $this->currentMiddleware;
                 foreach($routeMiddleware as $key => $middleware){
                     $middleware->handle($req, $res);
                 }
@@ -72,7 +73,7 @@ class App extends AbstractHttpMethods {
         }
     }
 
-    public function group(String $prefix, callable $callback, array $middleware = []){
+    public function group(string $prefix, callable $callback, array $middleware = []){
         $group = new Group();
         $callback($group);
         $groupRoutes = $group->getRoutes($prefix);
@@ -81,15 +82,16 @@ class App extends AbstractHttpMethods {
         foreach ($this->register as $key => $value){
             $this->register[$key] = array_merge($this->register[$key], $groupRoutes[$key]);
         }
-        $this->routMiddleWare = array_merge($this->routMiddleWare, $groupMiddleware);
+        $this->routeMiddleWare = array_merge($this->routeMiddleWare, $groupMiddleware);
     }
 
-    public function hasRoute(String $url, $method, IRequest &$req): bool {
+    public function hasRoute(string $url, $method, IRequest &$req): bool {
         $matcher = new RouteMatcher();
         foreach ($this->register[$method] as $key => $value) {
             $result = $matcher->match($key, $url);
             if($result){
                 $this->callback = $value;
+                $this->currentMiddleware = $this->routeMiddleWare[$key];
                 $req->setPathParams($matcher->pathParams);
                 return $result;
             }
