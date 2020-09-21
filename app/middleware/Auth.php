@@ -3,7 +3,7 @@
 namespace app\middleware;
 
 
-use app\libs\JWT;
+use tiny\libs\JWT;
 use tiny\exceptions\HttpUnauthorizedException;
 use tiny\interfaces\IMiddleware;
 use tiny\interfaces\IRequest;

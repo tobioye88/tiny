@@ -15,7 +15,6 @@ class Group extends AbstractHttpMethods {
             unset($this->register[$method]);
             $this->register = $newMethod;
         }
-        // print_r($this->register);
         return $this->register;
     }
 

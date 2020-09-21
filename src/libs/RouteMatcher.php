@@ -10,7 +10,7 @@ class RouteMatcher {
     public array $pathParams = [];
 
     public function match(string $appRoute, string $httpRoute): bool {
-        // does this route match 
+        // try direct match
         if($this->routeEquals($appRoute, $httpRoute)){
             return true;
         }

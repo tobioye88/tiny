@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\libs;
+namespace tiny\libs;
 
 class JWT
 {

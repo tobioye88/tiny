@@ -4,7 +4,6 @@ use tiny\interfaces\IHttpAllowedMethods;
 use tiny\interfaces\IRequest;
 use tiny\interfaces\IResponse;
 use app\middleware\Auth;
-use app\middleware\SampleMiddleware;
 
 $authMiddleware = new Auth();
 

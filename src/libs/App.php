@@ -11,9 +11,9 @@ use tiny\exceptions\HttpBadRequestException;
 use tiny\exceptions\HttpMethodNotAllowedException;
 
 /**
- * $app->get('/', function(req, res){}, middleware)
+ * $app->get('/', function(req, res){}, [middleware]);
  * $app->group('/', function($group){
- *      $group->get('', function($req, $res){}, [middleware])
+ *      $group->get('', function($req, $res){}, [middleware]);
  * }, [middleware]); 
  */
 class App extends AbstractHttpMethods {
