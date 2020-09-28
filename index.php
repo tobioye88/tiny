@@ -15,7 +15,7 @@ require "./app/functions.php";
 //get sample routes
 $route = require "./app/routes/route.php";
 
-use tiny\Libs\App;
+use tiny\libs\App;
 
 $app = new App;
 

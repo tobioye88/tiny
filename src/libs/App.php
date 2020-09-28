@@ -10,12 +10,7 @@ use tiny\exceptions\ResourceNotFound;
 use tiny\exceptions\HttpBadRequestException;
 use tiny\exceptions\HttpMethodNotAllowedException;
 
-/**
- * $app->get('/', function(req, res){}, [middleware]);
- * $app->group('/', function($group){
- *      $group->get('', function($req, $res){}, [middleware]);
- * }, [middleware]); 
- */
+
 class App extends AbstractHttpMethods {
     public const VIEW_PATH = __DIR__ . "/../../app/view/";
     public const BASE_PATH = __DIR__ . "/../../";
