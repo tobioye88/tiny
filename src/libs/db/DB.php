@@ -76,7 +76,7 @@ class DB
 		$this->_error = false;
 		$this->_errors = null;
 		$this->_sql = $sql;
-		Logger::debug($sql, $params);
+		// Logger::debug($sql, $params);
 
 		if($this->_query = $this->_pdo->prepare($this->_sql)){
 			if(count($params)){
