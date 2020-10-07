@@ -4,9 +4,9 @@ namespace tiny\exceptions;
 
 use Exception;
 use Throwable;
-use tiny\Libs\App;
-use tiny\Libs\HttpHeader;
-use tiny\Libs\Request;
+use tiny\libs\App;
+use tiny\libs\HttpHeader;
+use tiny\libs\Request;
 
 class HttpErrorHandler {
 

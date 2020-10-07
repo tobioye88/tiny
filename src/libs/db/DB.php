@@ -1,6 +1,7 @@
 <?php
 namespace tiny\libs\db;
 
+use app\utilities\Logger;
 use \PDO;
 use stdClass;
 use \PDOException;
@@ -75,12 +76,13 @@ class DB
 		$this->_error = false;
 		$this->_errors = null;
 		$this->_sql = $sql;
+		Logger::debug($sql, $params);
 
 		if($this->_query = $this->_pdo->prepare($this->_sql)){
 			if(count($params)){
 				$x=1;
 				foreach ($params as $param) {
-					if(is_string($param)){
+					if(is_string($param) || is_float($param) || is_double($param)){
 						$dataType = PDO::PARAM_STR;
 					}else if(is_numeric($param)){
 						$dataType = PDO::PARAM_INT;
@@ -119,7 +121,7 @@ class DB
 					if (count($condition) >= 3){
 						//[FIELD, OPERATION, VALUE,? AND | OR]
 						[$field, $operator, $placeholders, $values, $conjunction] = $this->getSqlClause($condition);
-						$sqlPartial .= " {$field} {$operator} {$placeholders} {$conjunction} ";
+						$sqlPartial .= " `{$field}` {$operator} {$placeholders} {$conjunction} ";
 						if(is_array($values)){
 							$params = array_merge($params, $values);
 						}else{
@@ -132,7 +134,7 @@ class DB
 				//[FIELD, OPERATION, VALUE]
 				[$field, $operator, $placeholders, $values] = $this->getSqlClause($conditionList);
 				$params = (is_array($values))? $values : [$values];
-				$sqlPartial .= " {$field} {$operator} {$placeholders} ";
+				$sqlPartial .= " `{$field}` {$operator} {$placeholders} ";
 			}
 			$sqlPartial = rtrim($sqlPartial, "AND ");
 			$sqlPartial = rtrim($sqlPartial, "OR ");
@@ -149,15 +151,15 @@ class DB
 		}
 
 		if(is_string($order)){
-			return " ORDER BY id {$order}";
+			return " ORDER BY `id` {$order}";
 		}
 
 		if(is_array($order) && count($order) == 1){
-			return " ORDER BY id {$order[0]}";
+			return " ORDER BY `id` {$order[0]}";
 		}
 
 		if(is_array($order) && count($order) == 2){
-			return " ORDER BY {$order[0]} {$order[1]}";
+			return " ORDER BY `{$order[0]}` {$order[1]}";
 		}
 
 		return '';
@@ -324,7 +326,7 @@ class DB
 		$x= 1;
 
 		foreach ($fields as $name => $value) {
-			$set .= "{$name} = ?";
+			$set .= "`{$name}` = ?";
 			if($x < count($fields)){
 				$set .= ", ";
 			}
@@ -335,9 +337,9 @@ class DB
 			$field = $idOrWhere[0];
 			$operator = $idOrWhere[1];
 			$value = $idOrWhere[2];
-			$sql = "UPDATE {$table} SET {$set} WHERE {$field} {$operator} '{$value}'";
+			$sql = "UPDATE `{$table}` SET {$set} WHERE `{$field}` {$operator} '{$value}'";
 		}else
-			$sql = "UPDATE {$table} SET {$set} WHERE id = {$idOrWhere}";
+			$sql = "UPDATE `{$table}` SET {$set} WHERE `id` = {$idOrWhere}";
 		if(!$this->query($sql, $fields)->hasError()){
 			return true;
 		}

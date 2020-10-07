@@ -86,7 +86,7 @@ class App extends AbstractHttpMethods {
             $result = $matcher->match($key, $url);
             if($result){
                 $this->callback = $value;
-                $this->currentMiddleware = $this->routeMiddleWare[$key];
+                $this->currentMiddleware = $this->routeMiddleWare[$key.':'.$method];
                 $req->setPathParams($matcher->pathParams);
                 return $result;
             }
