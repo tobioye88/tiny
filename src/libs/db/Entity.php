@@ -32,7 +32,7 @@ abstract class Entity implements IEntity, JsonSerializable
                 continue;
             }
             if($this->{$propertyName} !== null) {
-                $params[$propertyName] = $this->{$propertyName} == "NULL" ? null : $this->{$propertyName};
+                $params[$propertyName] = $this->{$propertyName} === "NULL" ? null : $this->{$propertyName};
             }
         }
 

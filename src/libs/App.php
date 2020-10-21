@@ -48,7 +48,7 @@ class App extends AbstractHttpMethods {
     
             $url = $req->getUrl();
             $method = $req->getMethod();
-            $registeredMethod = $this->register[$method];
+            $registeredMethod = $this->register[$method] ?? null;
             
             if($registeredMethod == null){
                 throw new HttpMethodNotAllowedException("Method not supported");
@@ -86,7 +86,7 @@ class App extends AbstractHttpMethods {
             $result = $matcher->match($key, $url);
             if($result){
                 $this->callback = $value;
-                $this->currentMiddleware = $this->routeMiddleWare[$key.':'.$method];
+                $this->currentMiddleware = $this->routeMiddleWare[$key.':'.$method] ?? [];
                 $req->setPathParams($matcher->pathParams);
                 return $result;
             }
