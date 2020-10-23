@@ -7,7 +7,7 @@ use tiny\interfaces\IHttpAllowedMethods;
 abstract class AbstractHttpMethods implements IHttpAllowedMethods
 {
     protected array $routeMiddleWare = [];
-    protected array $register = [
+    protected array $registeredRoute = [
         "GET" => [],
         "POST" => [],
         "PUT" => [],
@@ -19,31 +19,31 @@ abstract class AbstractHttpMethods implements IHttpAllowedMethods
     public function get(string $route, callable $callback, array $middleware = []){
         $route = trim($route, "/");
         $this->routeMiddleWare[$route.':'.'GET'] = $middleware;
-        $this->register['GET'][$route] = $callback;
+        $this->registeredRoute['GET'][$route] = $callback;
     }
 
     public function post(string $route, callable $callback, array $middleware = []){
         $route = trim($route, "/");
         $this->routeMiddleWare[$route.':'.'POST'] = $middleware;
-        $this->register['POST'][$route] = $callback; 
+        $this->registeredRoute['POST'][$route] = $callback; 
     }
 
     public function put(string $route, callable $callback, array $middleware = []){
         $route = trim($route, "/");
         $this->routeMiddleWare[$route.':'.'PUT'] = $middleware;
-        $this->register['PUT'][$route] = $callback; 
+        $this->registeredRoute['PUT'][$route] = $callback; 
     }
 
     public function patch(string $route, callable $callback, array $middleware = []){
         $route = trim($route, "/");
         $this->routeMiddleWare[$route.':'.'PATCH'] = $middleware;
-        $this->register['PATCH'][$route] = $callback; 
+        $this->registeredRoute['PATCH'][$route] = $callback; 
     }
 
     public function delete(string $route, callable $callback, array $middleware = []){
         $route = trim($route, "/");
         $this->routeMiddleWare[$route.':'.'DELETE'] = $middleware;
-        $this->register['DELETE'][$route] = $callback; 
+        $this->registeredRoute['DELETE'][$route] = $callback; 
     }
 
     public function options(string $route, callable $callback, array $middleware = []){
@@ -52,9 +52,9 @@ abstract class AbstractHttpMethods implements IHttpAllowedMethods
 
     public function any(string $route, callable $callback, array $middleware = []){
         $route = trim($route, "/");
-        foreach ($this->register as $key => $value){
+        foreach ($this->registeredRoute as $key => $value){
             $this->routeMiddleWare[$route.':'.$key] = $middleware;
-            $this->register[$key][$route] = $callback;
+            $this->registeredRoute[$key][$route] = $callback;
         }
     }
 }

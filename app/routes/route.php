@@ -4,10 +4,11 @@ use tiny\interfaces\IHttpAllowedMethods;
 use tiny\interfaces\IRequest;
 use tiny\interfaces\IResponse;
 use app\middleware\Auth;
+use tiny\libs\App;
 
 $authMiddleware = new Auth();
 
-return function ($app) use ($authMiddleware) {
+return function (App $app) use ($authMiddleware) {
 
 
     $app->get('/', function (IRequest $req, IResponse $res) {
@@ -19,8 +20,8 @@ return function ($app) use ($authMiddleware) {
         $res->view('index.php', compact('message'));
     });
 
-    $app->any('/api/{name}', function (IRequest $req, IResponse $res) {
-        $res->json(["GREETINGS" => $req->getPathParam('name')]);
+    $app->any('/login', function (IRequest $req, IResponse $res) {
+        $res->json(["login" => 'Please login here']);
     });
 
     $app->get('/api/{name}/world', function (IRequest $req, IResponse $res) {
@@ -41,6 +42,10 @@ return function ($app) use ($authMiddleware) {
 
     $app->group('api/v1/', function (IHttpAllowedMethods $group) use ($authMiddleware) {
 
+        $group->get('/', function (IRequest $req, IResponse $res) {
+            $res->json(['hello' => 'Inner route']);
+        });
+        
         $group->get('/admin', function (IRequest $req, IResponse $res) {
             $res->json(['admin' => 'Inner route']);
         }, [$authMiddleware]);
@@ -52,22 +57,22 @@ return function ($app) use ($authMiddleware) {
         $group->post('/admin', function (IRequest $req, IResponse $res) {
             $res->json(['admin' => 'unprotected Post Inner route']);
         });
-    });
+    }, [ $authMiddleware ]);
 
-    $app->group('api/v2/{name}', function (IHttpAllowedMethods $group) use ($authMiddleware) {
+    // $app->group('api/v2/{name}', function (IHttpAllowedMethods $group) use ($authMiddleware) {
 
-        $group->get('/special', function (IRequest $req, IResponse $res) {
-            $res->json([
-                'special' => 'Inner route',
-                'name' => $req->getPathParam('name'),
-            ]);
-        });//, [$authMiddleware]);
+    //     $group->get('/special', function (IRequest $req, IResponse $res) {
+    //         $res->json([
+    //             'special' => 'Inner route',
+    //             'name' => $req->getPathParam('name'),
+    //         ]);
+    //     });//, [$authMiddleware]);
 
-        $group->get('', function (IRequest $req, IResponse $res) {
-            $res->json([
-                'special' => 'Inner route',
-            ]);
-        });
+    //     $group->get('', function (IRequest $req, IResponse $res) {
+    //         $res->json([
+    //             'special' => 'Inner route',
+    //         ]);
+    //     });
 
-    });
+    // });
 };

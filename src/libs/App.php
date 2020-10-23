@@ -48,7 +48,7 @@ class App extends AbstractHttpMethods {
     
             $url = $req->getUrl();
             $method = $req->getMethod();
-            $registeredMethod = $this->register[$method] ?? null;
+            $registeredMethod = $this->registeredRoute[$method] ?? null;
             
             if($registeredMethod == null){
                 throw new HttpMethodNotAllowedException("Method not supported");
@@ -74,19 +74,19 @@ class App extends AbstractHttpMethods {
         $groupRoutes = $group->getRoutes($prefix);
         $groupMiddleware = $group->getMiddleware($prefix, $middleware);
 
-        foreach ($this->register as $key => $value){
-            $this->register[$key] = array_merge($this->register[$key], $groupRoutes[$key]);
+        foreach ($this->registeredRoute as $method => $value){
+            $this->registeredRoute[$method] = array_merge($this->registeredRoute[$method], $groupRoutes[$method]);
         }
         $this->routeMiddleWare = array_merge($this->routeMiddleWare, $groupMiddleware);
     }
 
     public function hasRoute(string $url, $method, IRequest &$req): bool {
         $matcher = new RouteMatcher();
-        foreach ($this->register[$method] as $key => $value) {
-            $result = $matcher->match($key, $url);
+        foreach ($this->registeredRoute[$method] as $innerRoute => $callback) {
+            $result = $matcher->match($innerRoute, $url);
             if($result){
-                $this->callback = $value;
-                $this->currentMiddleware = $this->routeMiddleWare[$key.':'.$method] ?? [];
+                $this->callback = $callback;
+                $this->currentMiddleware = $this->routeMiddleWare[$innerRoute.':'.$method] ?? [];
                 $req->setPathParams($matcher->pathParams);
                 return $result;
             }

@@ -5,25 +5,26 @@ class Group extends AbstractHttpMethods {
 
     public function getRoutes(string $prefix)
     {
-        foreach ($this->register as $method => $routesArray) {
+        foreach ($this->registeredRoute as $method => $routesArray) {
             $newMethod[$method] = [];
-            foreach ($routesArray as $previousKey => $callback) {
-                $newKey = trim($prefix, "/") . "/" . trim($previousKey, "/");
+            foreach ($routesArray as $routeSuffix => $callback) {
+                $newKey = trim($prefix, "/") . "/" . trim($routeSuffix, "/");
                 $newKey = trim($newKey, '/');
                 $newMethod[$method][$newKey] = $callback;
             }
-            unset($this->register[$method]);
-            $this->register = $newMethod;
+            unset($this->registeredRoute[$method]);
+            $this->registeredRoute = $newMethod;
         }
-        return $this->register;
+        return $this->registeredRoute;
     }
 
     public function getMiddleware(string $prefix, array $middleware =[])
     {
         $newRouteMiddleware = [];
-        foreach ($this->routeMiddleWare as $previousRoute => $callbackArray) {
-            $newKey = trim($prefix, "/") . "/" . trim($previousRoute, "/");
+        foreach ($this->routeMiddleWare as $routeSuffix => $callbackArray) {
+            $newKey = trim($prefix, "/") . "/" . trim($routeSuffix, "/");
             $newKey = trim($newKey, '/');
+            $newKey = preg_replace('(/:)', ':', $newKey);
             $newRouteMiddleware[$newKey] = array_merge($middleware, $callbackArray);
         }
         unset($this->register);
