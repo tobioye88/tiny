@@ -2,14 +2,22 @@
 
 DB::ins()->query("Select * from user", );
 DB::ins()->query("Select * from user where id = ? ", ['id'=>1]);
+
 DB::ins()->find("user", ['id', '=', 1]);
 DB::ins()->findALL("user");
 DB::ins()->findIn("user", 'id', [1,2,3,4]);
+
+DB::ins()->find('user', ['conditions' => ['id', '>', 1]]);
+
 DB::ins()->find('user', [
-	['id', '>', 1, 'AND'],
-	['email', 'like', '%john%', 'AND'],
-	['active', '=', 1, 'AND'],
-	['created_date', 'between', ['2020-01-10', '2020-03-01'], 'AND'],
+	'conditions' => [
+		['id', '>', 1, 'AND'],
+		['email', 'like', '%john%', 'AND'],
+		['active', '=', 1, 'AND'],
+		['created_date', 'between', ['2020-01-10', '2020-03-01'], 'AND'],
+	],
+	'order' => '',
+	'limit' => ['rowCount'] | ['offset', 'rowCount'],
 ]);
 
 $results = DB::ins()
@@ -25,7 +33,7 @@ $results = DB::ins()
 				->oneToMany(['manyTable' => ['manyTable.school_id', 'parentTable.id']])
 				->results();
 
-$resultes = DB::ins()
+$results = DB::ins()
 				->join('joiningTableName')
 				->manyToMany([
 					'pivotTable' => ['parent_column', 'anotherTable'],

@@ -280,7 +280,7 @@ class DB
 	}
 	
 	public function findAll($table, $page = null, $size = null, $conditions = []){
-		if($page == null && $size == null){
+		if($page === null && $size === null){
 			return $this->action("SELECT * ", $table, $conditions);
 		}else{
 			$conditions['limit'] = [$page, $size];

@@ -108,6 +108,15 @@ abstract class Entity implements IEntity, JsonSerializable
     /**
      *
      * @return Entity[]
+     */
+    public static function findAll(array $conditions=[], $page = null, $size = null) 
+    {
+        return self::all($conditions, $page, $size);
+    }
+
+    /**
+     *
+     * @return Entity[]
      * [conditions: [field, operation, $value], limit: [size, start]]
      */
     public static function find(array $conditions = []) 
@@ -173,6 +182,12 @@ abstract class Entity implements IEntity, JsonSerializable
     {
         $tableName = self::getTableName();
         return !DB::ins()->delete($tableName, ["conditions" => ["id", $id]])->hasError();
+    }
+
+    public static function removeBy(array $conditions)
+    {
+        $tableName = self::getTableName();
+        return !DB::ins()->delete($tableName, ["conditions" => $conditions])->hasError();
     }
     
     public static function deleteIn(array $list, $field="id")
