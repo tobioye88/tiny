@@ -31,8 +31,8 @@ abstract class Entity implements IEntity, JsonSerializable
             if(in_array(strtolower($propertyName),["id", "tablename", "db", "ignoreIfEmpty"])){
                 continue;
             }
-            if($this->{$propertyName} !== null) {
-                $params[$propertyName] = $this->{$propertyName} === "NULL" ? null : $this->{$propertyName};
+            if(isset($this->{$propertyName}) && $this->{$propertyName} !== null) {
+                $params[$propertyName] = $this->{$propertyName} === "NULL" || $this->{$propertyName} === "null" ? null : $this->{$propertyName};
             }
         }
 
@@ -73,10 +73,31 @@ abstract class Entity implements IEntity, JsonSerializable
                 continue;
             }
 
+            $propertyType = $prop->getType() == null? null : $prop->getType()->getName();
+
             if (isset($object->{$propertyName})) {
                 $property = $class->getProperty($propertyName);
                 $property->setAccessible(true);
-                $property->setValue($entity, $object->{$propertyName});
+                switch($propertyType){
+                    case 'int':
+                        $value = $object->{$propertyName} === null ? null : (int) $object->{$propertyName};
+                        $property->setValue($entity, $value);
+                        break;
+                    case 'string':
+                        $value = $object->{$propertyName} === null ? null : (string) $object->{$propertyName};
+                        $property->setValue($entity, $value);
+                        break;
+                    case 'float':
+                        $value = $object->{$propertyName} === null ? null : (float) $object->{$propertyName};
+                        $property->setValue($entity, $value);
+                        break;
+                    case 'bool':
+                        $value = $object->{$propertyName} === null ? null : boolval($object->{$propertyName});
+                        $property->setValue($entity, $value);
+                        break;
+                    default:
+                        $property->setValue($entity, $object->{$propertyName});
+                }
             }
         }
 

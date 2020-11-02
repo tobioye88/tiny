@@ -97,8 +97,12 @@ function getFileExtension(string $filename): string
     return $ext;
 }
 
-function getViewPath(){
-    return App::VIEW_PATH;
+function getViewPath($path = null): string {
+    if($path){
+        return App::VIEW_PATH . '/' . trim($path, '(/|.php)') . '.php';
+    }else{
+        return App::VIEW_PATH;
+    }
 }
 
 function pagination($link, $pageNumber, $totalRows, $resultsPerPage = 20) {
