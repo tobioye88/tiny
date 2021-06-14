@@ -1,10 +1,11 @@
 <?php
 namespace tiny\libs\db;
 
-use app\utilities\Logger;
+
 use \PDO;
 use stdClass;
 use \PDOException;
+use tiny\libs\Logger;
 use tiny\libs\db\exceptions\DatabaseException;
 
 /*
@@ -21,7 +22,7 @@ class DB
 			$_error = false,
 			$_errors,
 			$_results,
-			$_operators = ['=', '!=', '>', '<', '<=', '>=', 'LIKE', 'IN', 'BETWEEN', "IS", "IS NOT"],
+			$_operators = ['=', '!=', '>', '<', '<=', '>=', 'LIKE', 'IN', 'NOT IN', 'BETWEEN', "IS", "IS NOT"],
 			$_count = 0;
 
 	private function __construct(){
@@ -33,7 +34,7 @@ class DB
 			);
 			$this->_pdo = new PDO(DB_TYPE.':host='.DB_HOST.';dbname='.DB_NAME, DB_USER, DB_PASS, $options);
 		}catch(PDOException $e){
-			die($e->getMessage());
+			throw new DatabaseException($e->getMessage());
 		}
 	}
 
@@ -81,7 +82,7 @@ class DB
 		$this->_error = false;
 		$this->_errors = null;
 		$this->_sql = $sql;
-		// Logger::debug($sql, $params);
+		Logger::debug($sql, $params);
 
 		if($this->_query = $this->_pdo->prepare($this->_sql)){
 			if(count($params)){
@@ -114,11 +115,11 @@ class DB
 
 	private function getConditions(array $conditions){
 		$conditionList = $conditions["conditions"] ?? false;
-		$limit = $this->getLImit($conditions);
+		$limit = $this->getLimit($conditions);
 		$sqlPartial = "";
 		$params = [];
 		if($conditionList){
-			if(is_array($conditionList) && is_array($conditionList[0])){
+			if(is_array($conditionList) && isset($conditionList[0]) && is_array($conditionList[0])){
 				// add up all the conditions
 				// FIELD OPERATION PREDICATE
 				foreach($conditionList as $condition){
@@ -126,7 +127,7 @@ class DB
 					if (count($condition) >= 3){
 						//[FIELD, OPERATION, VALUE,? AND | OR]
 						[$field, $operator, $placeholders, $values, $conjunction] = $this->getSqlClause($condition);
-						$sqlPartial .= " `{$field}` {$operator} {$placeholders} {$conjunction} ";
+						$sqlPartial .= "{$field} {$operator} {$placeholders} {$conjunction} ";
 						if(is_array($values)){
 							$params = array_merge($params, $values);
 						}else{
@@ -139,7 +140,7 @@ class DB
 				//[FIELD, OPERATION, VALUE]
 				[$field, $operator, $placeholders, $values] = $this->getSqlClause($conditionList);
 				$params = (is_array($values))? $values : [$values];
-				$sqlPartial .= " `{$field}` {$operator} {$placeholders} ";
+				$sqlPartial .= "{$field} {$operator} {$placeholders} ";
 			}
 			$sqlPartial = rtrim($sqlPartial, "AND ");
 			$sqlPartial = rtrim($sqlPartial, "OR ");
@@ -156,21 +157,21 @@ class DB
 		}
 
 		if(is_string($order)){
-			return " ORDER BY `id` {$order}";
+			return "ORDER BY id {$order}";
 		}
 
 		if(is_array($order) && count($order) == 1){
-			return " ORDER BY `id` {$order[0]}";
+			return "ORDER BY id {$order[0]}";
 		}
 
 		if(is_array($order) && count($order) == 2){
-			return " ORDER BY `{$order[0]}` {$order[1]}";
+			return "ORDER BY {$order[0]} {$order[1]}";
 		}
 
 		return '';
 	}
 
-	private function getLImit (array $condition){
+	private function getLimit (array $condition){
 		$limit = $condition["limit"] ?? false;
 		$limitSQL = "LIMIT ";
 		if($limit && !is_numeric($limit[0]) && !is_numeric($limit[1])){ throw new DatabaseException("Limit values must be numeric"); }
@@ -224,9 +225,9 @@ class DB
 			$values = $condition[2];
 			return [$field, $operator, $placeholder, $values, $conjunction];
 		}else if(count($condition) >= 3 
-		&& isset($condition[1]) 
-		&& $operator == "IN" 
-		&& is_array($condition[2])){
+				&& isset($condition[1]) 
+				&& $operator == "IN" 
+				&& is_array($condition[2])){
 			//break in down to look like this ( ?, ?,...)
 			$placeholder .= " ( " . $this->getPlaceholderMarkers($condition[2]) . " ) ";
 			$values = array_merge($values, $condition[2]);
@@ -259,11 +260,26 @@ class DB
 		throw new DatabaseException("Error occurred while executing query {$this->_sql}\n<br> " . implode($this->_errors) . "\n<br>");
 	}
 
-	public function results(){
-		if($this->_results && count($this->_results))
+	public function results(array $only = []){
+		if($this->hasError()){
+			throw new DatabaseException(implode($this->_errors));
+		}
+		if($this->_results && count($this->_results)){
+			if(!empty($only)){
+
+				if(count($only) == 1){
+					return array_column($this->_results, $only[0]);
+				}
+
+				return array_map(function ($el) use ($only) {
+					$o = [];
+					return array_intersect_key((array) $el, array_flip($only));
+				}, $this->_results);
+			}
 			return $this->_results;
-		else
+		}else{
 			return [];
+		}
     }
     
 	public function first(){
@@ -281,23 +297,26 @@ class DB
     
 	public function find($table, array $conditions=[]){
 		if(!isset($conditions["conditions"]) || empty($conditions["conditions"])) throw new DatabaseException("Empty conditions list");
-		return $this->action("SELECT * ", $table, $conditions);
+		return $this->action("SELECT *", $table, $conditions);
 	}
 	
 	public function findAll($table, $page = null, $size = null, $conditions = []){
 		if($page === null && $size === null){
-			return $this->action("SELECT * ", $table, $conditions);
+			return $this->action("SELECT *", $table, $conditions);
 		}else{
 			$conditions['limit'] = [$page, $size];
-			return $this->action("SELECT * ", $table, $conditions);
+			return $this->action("SELECT *", $table, $conditions);
 		}
 	}
 
-    public function findIn($table, $field, $list = [], $negate = false){
+    public function findIn($table, $field, $list = []){
 		if(!count($list)) throw new DatabaseException("Search list can't be empty");
-		//SELECT * FORM tablename WHERE field IN (condition, condition,...)
-        return $this->action("SELECT * ", $table, ["conditions"=>[$field, "IN", $list]]);
+        return $this->action("SELECT *", $table, ["conditions"=>[$field, "IN", $list]]);
+    }
 
+    public function findNotIn($table, $field, $list = []){
+		if(!count($list)) throw new DatabaseException("Search list can't be empty");
+        return $this->action("SELECT *", $table, ["conditions"=>[$field, "NOT IN", $list]]);
     }
     
 	public function insert($table, $fields=[]){
@@ -307,7 +326,7 @@ class DB
 
 			$values = $this->getPlaceholderMarkers($fields);
 
-			$sql = "INSERT INTO $table (`".implode('`,`', $keys)."`) VALUES ({$values})";
+			$sql = "INSERT INTO $table (".implode(', ', $keys).") VALUES ({$values})";
 			$this->_type = 'insert';
 			if(!$this->query($sql, $fields)->hasError()){
 				return $this;
@@ -327,35 +346,54 @@ class DB
     }
     
 	public function update($table, $fields, $idOrWhere){
-		$set = '';
-		$x= 1;
+		$set = $this->getUpdateSet($fields);
 
-		foreach ($fields as $name => $value) {
-			$set .= "`{$name}` = ?";
-			if($x < count($fields)){
-				$set .= ", ";
-			}
-			$x++;
-		}
 		$sql = "";
-		if(is_array($idOrWhere) && count($idOrWhere) == 3){
-			$field = $idOrWhere[0];
-			$operator = $idOrWhere[1];
-			$value = $idOrWhere[2];
-			$sql = "UPDATE `{$table}` SET {$set} WHERE `{$field}` {$operator} '{$value}'";
-		}else
-			$sql = "UPDATE `{$table}` SET {$set} WHERE `id` = {$idOrWhere}";
+		if(is_array($idOrWhere)){
+		    $conditions = $this->getConditionFromWhere($idOrWhere);
+            [$clause] = $this->getConditions($conditions);
+            $sql = "UPDATE {$table} SET {$set} WHERE {$clause}";
+		}else{
+			$sql = "UPDATE {$table} SET {$set} WHERE id = {$idOrWhere}";
+        }
 		if(!$this->query($sql, $fields)->hasError()){
 			return true;
 		}
 		return false;
 	}
 
+    public function getConditionFromWhere($where)
+    {
+        $conditions = $where;
+        if(is_array($where) && !isset($where['conditions'])){
+            $conditions = ['conditions' => $where];
+        }
+        return $conditions;
+	}
+
+	public function getUpdateSet(array $fields)
+    {
+	    $set = "";
+        $x= 1;
+        foreach ($fields as $name => $value) {
+            $set .= $name == 'read' ? "`{$name}` = ?" : "{$name} = ?";
+            if($x < count($fields)){
+                $set .= ", ";
+            }
+            $x++;
+        }
+        return trim($set);
+    }
+
 	public function join($tableName, $conditionList=[]){
 		$parent = $this;
 
 		return new class ($tableName, $conditionList, $parent) {
-			public function __construct($tableName, $conditionList, $parent) {
+            private string $tableName;
+            private array $conditionList;
+            private DB $parent;
+
+            public function __construct($tableName, $conditionList, $parent) {
 				$this->tableName = $tableName;
 				$this->conditionList = $conditionList;
 				$this->parent = $parent;
@@ -366,7 +404,7 @@ class DB
 					case 'ONE_TO_ONE':
 						$sql = "";
 						foreach ($array as $key => $value) {
-							$sql .= " LEFT JOIN {$key} on {$value[0]} = {$value[1]} ";
+							$sql .= " LEFT JOIN {$key} ON {$value[0]} = {$value[1]} ";
 						}
 						// $sql = rtrim($sql, ", ");
 						// echo $sql;
@@ -375,7 +413,7 @@ class DB
 					case 'ONE_TO_MANY':
 						$sql = "";
 						foreach ($array as $key => $value) {
-							$sql .= " LEFT JOIN {$key} on {$value[0]} = {$value[1]} ";
+							$sql .= " LEFT JOIN {$key} ON {$value[0]} = {$value[1]} ";
 						}
 						// $sql = rtrim($sql, ", ");
 						return $sql;
@@ -397,17 +435,20 @@ class DB
 
 			public function oneToOne(Array $array){
 				$joinString = $this->getJoinSql("ONE_TO_ONE", $array);
-				return $this->parent->action("SELECT * ", $this->tableName, $this->conditionList, $joinString);
+				$joinString = trim($joinString);
+				return $this->parent->action("SELECT *", $this->tableName, $this->conditionList, $joinString);
 			}
 
 			public function oneToMany(Array $array){
 				$joinString = $this->getJoinSql("ONE_TO_MANY", $array);
-				return $this->parent->action("SELECT * ", $this->tableName, $this->conditionList, $joinString);
+				$joinString = trim($joinString);
+				return $this->parent->action("SELECT *", $this->tableName, $this->conditionList, $joinString);
 			}
 
 			public function manyToMany(Array $array){
 				$joinString = $this->getJoinSql("MANY_TO_MANY", $array);
-				return $this->parent->action("SELECT * ", $this->tableName, $this->conditionList, $joinString);
+				$joinString = trim($joinString);
+				return $this->parent->action("SELECT *", $this->tableName, $this->conditionList, $joinString);
 			}
 
 		};

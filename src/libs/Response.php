@@ -57,17 +57,22 @@ class Response implements IResponse {
     }
 
     public function json($body, $statusCode=200){
-        // header_remove();
-        // header('Content-type: application/json; charset=utf-8');
         HttpHeader::setContentType('json');
         HttpHeader::setStatusCode($statusCode);
         echo json_encode($body); //, JSON_PRETTY_PRINT
         exit();
     }
+
+    public function write(string $text): void
+    {
+        echo $text;
+        exit();
+    }
     
-    public function text($body){
+    public function text(string $text){
         header('Content-type: text/plain; charset=utf-8');
-        // echo 
+        echo $text;
+        exit();
     }
 
     public function setCookies(string $name, string $value): void

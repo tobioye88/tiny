@@ -5,6 +5,7 @@ use tiny\interfaces\IRequest;
 use tiny\interfaces\IResponse;
 use app\middleware\Auth;
 use tiny\libs\App;
+use tiny\libs\Email;
 
 $authMiddleware = new Auth();
 
@@ -13,6 +14,18 @@ return function (App $app) use ($authMiddleware) {
 
     $app->get('/', function (IRequest $req, IResponse $res) {
         $res->json(["GREETINGS" => "/"]);
+    });
+    
+    $app->get('/email', function (IRequest $req, IResponse $res) {
+
+        $result = Email::builder()
+                ->from('email@localhost')
+                ->to('tobioye88@yahoo.com')
+                ->subject('Hello There')
+                ->body('Hello, World!')
+                ->send();
+
+        $res->json(["isSent" => $result]);
     });
 
     $app->get('/home', function (IRequest $req, IResponse $res) {

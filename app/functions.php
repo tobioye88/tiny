@@ -7,7 +7,17 @@ function startsWith ($string, $startString)
 { 
     $len = strlen($startString); 
     return (substr($string, 0, $len) === $startString); 
-} 
+}
+
+function stringContains($haystack, $needle): bool 
+{
+    return strpos($haystack, $needle);
+}
+
+function countOccurrence($haystack, $needle): int 
+{
+    return substr_count($haystack, $needle);
+}
 
 function formatText($text)
 {
@@ -119,8 +129,6 @@ function pagination($link, $pageNumber, $totalRows, $resultsPerPage = 20) {
             <li class="page-item"><a class="page-link" href="'. $link . "1" .'">FIRST</a></li>';
         $close = '<li class="page-item"><a class="page-link" href="'. $link . $last .'">LAST</a></li></ul></nav>';
         if($pageNumber > 1){
-            // $previous = $pageNumber - 1;
-            // $previousBnt = '<li class="page-item"><a class="page-link" href="'. $link . $previous.'">BACK</a></li>';
         
             for($i = $pageNumber - 2; $i < $pageNumber; $i++){
                 if($i > 0){
@@ -129,7 +137,6 @@ function pagination($link, $pageNumber, $totalRows, $resultsPerPage = 20) {
             }
         }else{
         $center = '<li class="page-item active"><a class="page-link" href="#" onclick="return false;">'.$pageNumber .'</a></li>';
-            // $previousBnt = '<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">BACK</a></li>';
         }
         $center = '<li class="page-item active"><a class="page-link" href="#" onclick="return false;">'.$pageNumber .'</a></li>';
         $nextCount = $pageNumber + 2 > $last ? $last : $pageNumber + 2;
@@ -138,12 +145,6 @@ function pagination($link, $pageNumber, $totalRows, $resultsPerPage = 20) {
             if($i > $pageNumber +4){
                 break;
             }
-        }
-        if($pageNumber != $last){
-            // $next = $pageNumber + 1;
-            // $nextBtn = '<li class="page-item"><a class="page-link" href="'.$link.$next.'">NEXT</a></li>';
-        }else {
-            // $nextBtn = '<li class="page-item disabled"><a class="page-link" href="#" onclick="return false;" tabindex="+1">NEXT</a></li>';
         }
     } 
     echo  $open . $previousBnt . $centerLeft . $center . $centerRight . $nextBtn . $close; 

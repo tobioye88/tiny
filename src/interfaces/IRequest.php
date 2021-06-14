@@ -37,7 +37,11 @@ interface IRequest {
 
     public function uploadFile(string $destination, string $fieldName, $newName=null): bool;
 
+    public function hasFile(string $fieldName): bool;
+
     public function file($fileName);
+
+    public function files($fileName = null);
 
     public function fileSize($fileName);
 
@@ -45,6 +49,10 @@ interface IRequest {
     
     public function fileType($fileName);
 
-    public function acceptJson();
+    public function acceptJson(): bool;
+
+    public function getBodyAsArray(array $arrayList): array;
+
+    public function getBodyAsObject(array $arrayList): object;
 
 }

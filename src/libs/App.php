@@ -14,6 +14,7 @@ use tiny\exceptions\HttpMethodNotAllowedException;
 class App extends AbstractHttpMethods {
     public const VIEW_PATH = __DIR__ . "/../../app/view/";
     public const BASE_PATH = __DIR__ . "/../../";
+    public static string $url;
     
     private static string $defaultErrorView = "";
     private $callback;
@@ -46,7 +47,7 @@ class App extends AbstractHttpMethods {
                 $middleware->handle($req, $res);
             }
     
-            $url = $req->getUrl();
+            App::$url = $url = $req->getUrl();
             $method = $req->getMethod();
             $registeredMethod = $this->registeredRoute[$method] ?? null;
             

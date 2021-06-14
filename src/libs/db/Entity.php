@@ -1,17 +1,16 @@
 <?php
 namespace tiny\libs\db;
 
+use Error;
 use JsonSerializable;
 use ReflectionClass;
 use ReflectionProperty;
-
+use tiny\libs\db\exceptions\DatabaseException;
 
 //TODO: move mapping functions to an object mapper class
 abstract class Entity implements IEntity, JsonSerializable
 {
-    protected $tableName;
-    // public $ignoreIfEmpty = [];
-
+    protected string $tableName;
 
     public function __construct(int $id = null) {
         if($id){
@@ -28,7 +27,7 @@ abstract class Entity implements IEntity, JsonSerializable
         $params = [];
         foreach (self::getAllProperties($class) as $property) {
             $propertyName = $property->getName();
-            if(in_array(strtolower($propertyName),["id", "tablename", "db", "ignoreIfEmpty"])){
+            if(self::isPropertyNameReservedName($propertyName)){
                 continue;
             }
             if(isset($this->{$propertyName}) && $this->{$propertyName} !== null) {
@@ -36,13 +35,79 @@ abstract class Entity implements IEntity, JsonSerializable
             }
         }
 
-        if ($this->id > 0) {
+        if (isset($this->id) && $this->id > 0) {
             $this->db = DB::ins()->update($tableName, $params, $this->id);
         } else {
             $this->id = DB::ins()->insert($tableName, $params)->getLastId();
         }
 
         return self::build(DB::ins()->find($this->tableName, ["conditions" => ["id", "=", $this->id]])->first(), $this);
+    }
+
+    public static function isPropertyNameReservedName(string $propertyName): bool
+    {
+        return in_array(strtolower($propertyName), ["id", "tablename", "db", "ignoreIfEmpty"]);
+    }
+
+    public static function isPropertyNameReservedNameExcludeId(string $propertyName): bool
+    {
+        return in_array(strtolower($propertyName), ["tablename", "db", "ignoreIfEmpty"]);
+    }
+
+    public static function create(array $args): self
+    {
+        $class = new ReflectionClass(get_called_class());
+        $entity = $class->newInstance();
+
+        foreach (self::getAllProperties($class) as $property) {
+            $propertyName = $property->getName();
+            if(self::isPropertyNameReservedNameExcludeId($propertyName)){
+                continue;
+            }
+            
+            if(isset($args[$propertyName])) {
+                $entity->{$propertyName} = $args[$propertyName];
+            }
+        }
+
+        return $entity->save();
+    }
+
+    public static function createBulk(array $listOfAssoc): array 
+    {
+        // start transaction
+        // DB::beginTransaction();
+        $savedList = [];
+        try {
+            foreach($listOfAssoc as $key => $assoc){
+                $object = self::fill($assoc);
+                $object->save();
+                array_push($savedList, $object);
+            }
+            // DB::commit();
+        } catch (DatabaseException $e) {
+            // DB::rollback();
+            throw new DatabaseException("Bulk creation failed. " . $e->getMessage());
+        }
+        return $savedList;
+    }
+
+    public static function fill(array $assoc): self
+    {
+        $class = new ReflectionClass(get_called_class());
+        $entity = $class->newInstance();
+
+        foreach (self::getAllProperties($class) as $property) {
+            $propertyName = $property->getName();
+            if(self::isPropertyNameReservedName($propertyName)){
+                continue;
+            }
+            if(isset($assoc[$propertyName])){
+                $entity->{$propertyName} = $assoc[$propertyName];
+            }
+
+        }
+        return $entity;
     }
 
 
@@ -69,15 +134,15 @@ abstract class Entity implements IEntity, JsonSerializable
 
         foreach (self::getAllProperties($class) as $prop) {
             $propertyName = $prop->getName();
-            if(in_array(strtolower($propertyName),["tablename", "db"])){
+            if(self::isPropertyNameReservedNameExcludeId($propertyName)){
                 continue;
             }
 
             $propertyType = $prop->getType() == null? null : $prop->getType()->getName();
 
+            $property = $class->getProperty($propertyName);
+            $property->setAccessible(true);
             if (isset($object->{$propertyName})) {
-                $property = $class->getProperty($propertyName);
-                $property->setAccessible(true);
                 switch($propertyType){
                     case 'int':
                         $value = $object->{$propertyName} === null ? null : (int) $object->{$propertyName};
@@ -98,10 +163,39 @@ abstract class Entity implements IEntity, JsonSerializable
                     default:
                         $property->setValue($entity, $object->{$propertyName});
                 }
+            }else{
+                try {
+                    // If property is not nullish (public ?string) an exception will be thrown; 
+                    $property->setValue($entity, null);
+                } catch (Error $e) {
+                    // Fail Silently
+                }
             }
         }
 
         return $entity;
+    }
+
+    /**
+     *
+     * @return Entity
+     */
+    public static function lastOne() 
+    {
+        $tableName = self::getTableName();
+        $conditions = ['limit' => [1], 'order' => 'desc'];
+        return self::buildList(DB::ins()->find($tableName, $conditions)->first());
+    }
+
+    /**
+     *
+     * @return Entity[]
+     */
+    public static function last(int $number = 1) 
+    {
+        $tableName = self::getTableName();
+        $conditions = ['limit' => [$number], 'order' => 'desc'];
+        return self::buildList(DB::ins()->find($tableName, $conditions)->results());
     }
 
     /**
@@ -116,13 +210,32 @@ abstract class Entity implements IEntity, JsonSerializable
         return $list;
     }
 
+    public static function getPage(int $page, int $size): int
+    {
+        if($page <= 1){
+            return 0;
+        }
+        return ($page - 1) * $size;
+    }
+
     /**
      *
      * @return Entity[]
      */
-    public static function all(array $conditions=[], $page = null, $size = null) 
+    public static function all(array $conditions=[]) 
     {
         $tableName = self::getTableName();
+        return self::buildList(DB::ins()->findAll($tableName, null, null, $conditions)->results());
+    }
+
+    /**
+     *
+     * @return Entity[]
+     */
+    public static function paged(array $conditions=[], $page = 0, $size = 20) 
+    {
+        $tableName = self::getTableName();
+        $page = self::getPage($page, $size);
         return self::buildList(DB::ins()->findAll($tableName, $page, $size, $conditions)->results());
     }
 
@@ -132,7 +245,9 @@ abstract class Entity implements IEntity, JsonSerializable
      */
     public static function findAll(array $conditions=[], $page = null, $size = null) 
     {
-        return self::all($conditions, $page, $size);
+
+        $page = self::getPage($page, $size);
+        return self::paged($conditions, $page, $size);
     }
 
     /**
@@ -193,32 +308,39 @@ abstract class Entity implements IEntity, JsonSerializable
         return self::buildList(DB::ins()->find($tableName, ["conditions" => [$field, "LIKE", $value]])->results());
     }
     
-    public function delete($id = null)
+    public function delete($id = null): bool
     {
         $id = $this->id ?? $id;
         return !DB::ins()->delete($this->tableName, ["conditions" => ["id", $id]])->hasError();
     }
 
-    public static function remove(int $id)
+    public static function remove(int $id): bool
     {
         $tableName = self::getTableName();
         return !DB::ins()->delete($tableName, ["conditions" => ["id", $id]])->hasError();
     }
 
-    public static function removeBy(array $conditions)
+    public static function removeBy(array $conditions): bool
     {
         $tableName = self::getTableName();
         return !DB::ins()->delete($tableName, ["conditions" => $conditions])->hasError();
     }
     
-    public static function deleteIn(array $list, $field="id")
+    public static function deleteIn(array $list, $field="id"): bool
     {
         $tableName = self::getTableName();
         return !DB::ins()->delete($tableName, ["conditions" => [$field, "IN", $list]])->hasError();
     }
 
-    public function hasOne(Array $arr, $conditions = []){
+    public function hasOne(Array $arr, $conditions = [])
+    {
         return DB::ins()->join($this->tableName, $conditions)->oneToOne($arr)->first();
+    }
+
+    public static function belongsToOne(Array $arr, $conditions = [])
+    {
+        $tableName = self::getTableName();
+        return DB::ins()->join($tableName, $conditions)->oneToOne($arr)->results();
     }
     
     public function hasMany(Array $arr, $conditions = []) 
@@ -238,6 +360,11 @@ abstract class Entity implements IEntity, JsonSerializable
         return DB::ins()->countRows($tableName, $conditions)->first()->count;
     }
 
+    public function exist(): bool
+    {
+        return !$this->isEmpty();
+    }
+
     public function isEmpty(): bool
     {
         //loop over each element 
@@ -250,7 +377,7 @@ abstract class Entity implements IEntity, JsonSerializable
             }
             return true;
         }
-        // return empty((array) $this);
+        return true;
     }
 
     public function jsonSerialize()
@@ -261,7 +388,7 @@ abstract class Entity implements IEntity, JsonSerializable
         $objectArray = [];
         foreach ($vars as $key => $prop) {
             $propertyName = $key;
-            if(in_array(strtolower($propertyName),["tablename", "db"])){
+            if(self::isPropertyNameReservedNameExcludeId($propertyName)){
                 continue;
             }
 

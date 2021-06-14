@@ -4,9 +4,9 @@ namespace tiny\libs;
 use \Exception;
 
 /**
-* File::set($destination)->upload();
-* File::set($destination)->uploadAll();
-* File::delete($destination);
+ * How to
+ * File::set($destination, $fieldName)->upload();
+ * File::delete($destination);
 */
 class File {
 	private static $_instance; 
@@ -24,29 +24,42 @@ class File {
 
 	protected function __construct(){}
 
-	public static function set($destination, $fieldname){
+	public static function set(string $destination, string $fieldname){
 		if(!isset(self::$_instance)){
 			self::$_instance = new self();
 		}
-		self::$_instance->_setFile($destination, $fieldname);
+		self::$_instance->setFile($destination, $fieldname);
 		// self::$_instance->_setDestination($destination);
 		return self::$_instance;
 	}
 	
-	protected function _setFile($dest, $fieldname){
+	protected function setFile(string $destination, string $fieldname){
 		$this->_name = $_FILES[$fieldname]["name"];
 		$this->_fileTmpLoc = $_FILES[$fieldname]["tmp_name"];
 		$this->_type = $_FILES[$fieldname]["type"]; 
 		$this->_size = $_FILES[$fieldname]["size"]; 
 		$this->_fileError = $_FILES[$fieldname]["error"];
-		$this->_setDestination($dest);
+		$this->_setDestination($destination);
 		$this->_setExtension();
+		$this->_path = rtrim($this->_path, '/') . '/';
 		$this->_lastPath = $this->_fullPath = $this->_path . $this->_name;
 	}
 	
-	protected function _setDestination($dest){
-		$dest = rtrim($dest, "/");
-		$this->_path = $dest;
+	protected function setFileArray(string $destination, array $fileArray){
+		$this->_name = $fileArray["name"];
+		$this->_fileTmpLoc = $fileArray["tmp_name"];
+		$this->_type = $fileArray["type"]; 
+		$this->_size = $fileArray["size"]; 
+		$this->_fileError = $fileArray["error"];
+		$this->_setDestination($destination);
+		$this->_setExtension();
+		$this->_path = rtrim($this->_path, '/') . '/';
+		$this->_lastPath = $this->_fullPath = $this->_path . $this->_name;
+	}
+	
+	protected function _setDestination(string $destination){
+		$destination = rtrim($destination, "/");
+		$this->_path = $destination;
 	}
 	
 	protected function _setExtension(){
@@ -60,9 +73,10 @@ class File {
 		return $this;
 	}
 	
-	public function upload(){
-		$this->createPath();
-		$moveResult = move_uploaded_file($this->_fileTmpLoc, $this->_path . '/' .$this->_name);
+	public function upload() {
+		// $this->createPath();
+		$this->_lastPath = $this->_path;
+		$moveResult = move_uploaded_file($this->_fileTmpLoc, $this->_path .$this->_name);
 		// Check to make sure the move result is true before continuing
 		if (!$moveResult) {
 			throw new Exception("File not uploaded. Try again.");

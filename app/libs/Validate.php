@@ -2,14 +2,28 @@
 namespace app\libs;
 
 /**
-*
+* rules
+* - min
+* - max
+* - matches
+* - alpha
+* - string
+* - alphanumeric
+* - regex
+* - number
+* - email
+* - unique
+
+* - array
+* - greater
+* - lesser
 */
 class Validate
 {
-    private $_passed = false,
-        	$_errors = [];
+    private bool $passed = false;
+    private array $errors = [];
     private $uniqueCallback;
-    private $messageSet = [];
+    private array $messageSet = [];
 
     function __construct($source = [], $ruleSet = [], $messageSet = [])
     {
@@ -107,8 +121,8 @@ class Validate
                 }
             }
         }
-        if (empty($this->_errors)) {
-            $this->_passed = true;
+        if (empty($this->errors)) {
+            $this->passed = true;
         }
         return $this;
     }
@@ -142,16 +156,16 @@ class Validate
 
     private function addError($field, $error)
     {
-        $this->_errors[$field][] = $error;
+        $this->errors[$field][] = $error;
     }
 
     public function errors()
     {
-        return $this->_errors;
+        return $this->errors;
     }
     
     public function passed(): bool
     {
-        return $this->_passed;
+        return $this->passed;
     }
 }

@@ -3,6 +3,7 @@
 
 namespace tiny\libs;
 
+use stdClass;
 use tiny\libs\File;
 use tiny\interfaces\IRequest;
 
@@ -85,10 +86,57 @@ class Request implements IRequest {
     public function parseBody()
     {
         $res = $_POST;
-        $inputJSON = file_get_contents('php://input');
-        $raw = json_decode($inputJSON, false);
+        $raw = $this->parseRawInput();
         return (object) array_merge((array) $res, (array) $raw);
+    }
+
+    private function parseRawInput(){
+        $inputJSON = file_get_contents('php://input');
+        $raw = new stdClass;
+        if(substr($inputJSON, 0, 2) == '"{'){
+            $inputJSON = rtrim($inputJSON, '"');
+            $inputJSON = ltrim($inputJSON, '"');
+            $inputJSON = stripslashes($inputJSON);
+        }
+        if(!startsWith($inputJSON, "------WebKitFormBoundary") && strlen($inputJSON)) $raw = json_decode($inputJSON, false);
+
+        if(startsWith($inputJSON, "------WebKitFormBoundary")){
+            preg_match_all('/\"(.+)\"\s+(.*)/', $inputJSON, $matches);
+
+            foreach($matches[1] as $key => $value){
+                if(stringContains($value, '[')){
+                    $count = countOccurrence($value, '[');
+
+                    $newValue = preg_replace('/\[|\]/', '', $value);
+                    if(!isset($raw->{$newValue})){
+                        $raw->{$newValue} = [];
+                    }
+                    $raw->{$newValue} = $this->buildBodyArray($raw->{$newValue}, trim($matches[2][$key]), $count);
+                }else{
+                    $raw->{$value} = trim($matches[2][$key]);
+                }
+            }
+        }
+        return $raw;
+    }
+
+
+    private function buildBodyArray(&$array, $value, $dept){
+        if($dept < 1){
+            return [];
+        }
         
+        if ($dept == 1) {
+            $array[] = $value;
+            return $array; /*Terminating condition*/
+        }
+        
+        if(($dept - 1 == 1) && isset($array[0])){
+            $array[0][] = $value;
+            return $array;
+        }
+
+        return [$this->buildBodyArray($array[0], $value, $dept-1)];
     }
 
     public function getHeader(string $name)
@@ -140,9 +188,20 @@ class Request implements IRequest {
         return $file->errors();
     }
 
+    public function hasFile(string $fileName): bool 
+    {
+        return isset($this->files[$fileName]);
+    }
+
     public function file($fileName)
     {
         return $this->files[$fileName];
+    }
+    
+    public function files($fileName = null)
+    {
+        if(!$fileName) return $this->files;
+        return $this->files[$fileName]; // TODO COMPLETE IMPLEMENTATION
     }
 
     public function fileSize($fileName)
@@ -160,9 +219,30 @@ class Request implements IRequest {
         return $this->files[$fileName]["type"]; ;
     }
 
-    public function acceptJson()
+    public function acceptJson(): bool
     {
+        $subject = $this->getHeader('Accept');
+        if(stripos($subject, ",")){
+            return stripos($subject, HttpHeader::getMimeType('json')) !== false;
+        }
         return HttpHeader::getMimeType('json') == $this->getHeader('Accept');
+    }
+
+    public function getBodyAsArray(array $nameList): array
+    {
+        $responseList = [];
+        foreach($nameList as $item){
+            if(!isset($this->body->{$item})){
+                continue;
+            }
+            $responseList[$item] = $this->body->{$item};
+        }
+        return $responseList;
+    }
+
+    public function getBodyAsObject(array $nameList): object
+    {
+        return (object) $this->getBodyAsArray($nameList);
     }
 
 }

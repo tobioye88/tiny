@@ -1,6 +1,6 @@
 <?php
 
-namespace app\libs;
+namespace tiny\libs;
 
 use Exception;
 use tiny\libs\App;
@@ -42,7 +42,7 @@ class Logger
      * @var array $dateFormat of the format used for the log.txt file; $logFormat used for the time of a single log event
      */
     protected static $options = [
-        'dateFormat' => 'd-M-Y',
+        'dateFormat' => 'Y-m-d',
         'logFormat' => 'H:i:s d-M-Y'
     ];
 
