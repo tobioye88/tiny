@@ -11,6 +11,8 @@ use tiny\libs\db\exceptions\DatabaseException;
 abstract class Entity implements IEntity, JsonSerializable
 {
     protected string $tableName;
+    private static $preSaveFunction;
+    private static $postSaveFunction;
 
     public function __construct(int $id = null) {
         if($id){
@@ -35,21 +37,28 @@ abstract class Entity implements IEntity, JsonSerializable
             }
         }
 
+        if(isset(self::$preSaveFunction) && is_callable(self::$preSaveFunction)) {
+            call_user_func(self::$postSaveFunction, $params);
+        }
+
         if (isset($this->id) && $this->id > 0) {
             $this->db = DB::ins()->update($tableName, $params, $this->id);
         } else {
             $this->id = DB::ins()->insert($tableName, $params)->getLastId();
         }
+        if(self::$postSaveFunction && is_callable(self::$postSaveFunction)) {
+            call_user_func(self::$postSaveFunction, $params);
+        }
 
         return self::build(DB::ins()->find($this->tableName, ["conditions" => ["id", "=", $this->id]])->first(), $this);
     }
 
-    public static function isPropertyNameReservedName(string $propertyName): bool
+    private static function isPropertyNameReservedName(string $propertyName): bool
     {
         return in_array(strtolower($propertyName), ["id", "tablename", "db", "ignoreIfEmpty"]);
     }
 
-    public static function isPropertyNameReservedNameExcludeId(string $propertyName): bool
+    private static function isPropertyNameReservedNameExcludeId(string $propertyName): bool
     {
         return in_array(strtolower($propertyName), ["tablename", "db", "ignoreIfEmpty"]);
     }
@@ -73,6 +82,9 @@ abstract class Entity implements IEntity, JsonSerializable
         return $entity->save();
     }
 
+    /**
+     * @throws DatabaseException
+     */
     public static function createBulk(array $listOfAssoc): array 
     {
         // start transaction
@@ -180,7 +192,7 @@ abstract class Entity implements IEntity, JsonSerializable
      *
      * @return Entity
      */
-    public static function lastOne() 
+    public static function lastOne()
     {
         $tableName = self::getTableName();
         $conditions = ['limit' => [1], 'order' => 'desc'];
@@ -265,7 +277,7 @@ abstract class Entity implements IEntity, JsonSerializable
      *
      * @return Entity[]
      */
-    public static function findBy($arr, $order = "asc")
+    public static function findBy(array $arr, $order = "asc")
     {
         $tableName = self::getTableName();
         $conditions = ["conditions" => $arr, 'order' => $order];
@@ -363,6 +375,14 @@ abstract class Entity implements IEntity, JsonSerializable
     public function exist(): bool
     {
         return !$this->isEmpty();
+    }
+
+    public static function preSave(callable $callable){
+        self::$preSaveFunction = $callable;
+    }
+
+    public static function postSave(callable $callable){
+        self::$postSaveFunction = $callable;
     }
 
     public function isEmpty(): bool
