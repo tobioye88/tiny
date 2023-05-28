@@ -1,6 +1,6 @@
 <?php
 
-namespace app\middleware;
+namespace src\app\middleware;
 
 
 use tiny\libs\JWT;

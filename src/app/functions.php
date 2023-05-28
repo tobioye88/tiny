@@ -1,6 +1,6 @@
 <?php
 
-use app\libs\AuthenticationManager;
+use src\app\libs\AuthenticationManager;
 use tiny\libs\App;
 
 function startsWith ($string, $startString) 

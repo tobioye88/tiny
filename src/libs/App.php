@@ -12,7 +12,7 @@ use tiny\exceptions\HttpMethodNotAllowedException;
 
 
 class App extends AbstractHttpMethods {
-    public const VIEW_PATH = __DIR__ . "/../../app/view/";
+    public const VIEW_PATH = __DIR__ . "/../../src/app/view/";
     public const BASE_PATH = __DIR__ . "/../../";
     public static string $url;
     

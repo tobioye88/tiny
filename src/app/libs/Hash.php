@@ -1,5 +1,5 @@
 <?php
-namespace app\libs;
+namespace src\app\libs;
 
 class Hash {
 

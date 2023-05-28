@@ -1,5 +1,5 @@
 # Tiny Framework
-> Version 1.0.0
+> Version 1.1.0
    
 
 
@@ -168,3 +168,19 @@ $app->group('/admin', function($group){
 
 ```
 
+
+### Sending Emails
+
+```php
+$app->get('/email', function (IRequest $req, IResponse $res) {
+
+        $result = Email::builder()
+                ->from('email@localhost')
+                ->to('tobioye88@yahoo.com')
+                ->subject('Hello There')
+                ->body('Hello, World!')
+                ->send();
+
+        $res->json(["isSent" => $result]);
+    });
+```
