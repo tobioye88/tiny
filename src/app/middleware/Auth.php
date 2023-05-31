@@ -1,13 +1,13 @@
 <?php
 
-namespace src\app\middleware;
+namespace Tiny\App\Middleware;
 
 
-use tiny\libs\JWT;
-use tiny\exceptions\HttpUnauthorizedException;
-use tiny\interfaces\IMiddleware;
-use tiny\interfaces\IRequest;
-use tiny\interfaces\IResponse;
+use Tiny\Libs\JWT;
+use Tiny\Exceptions\HttpUnauthorizedException;
+use Tiny\Interfaces\IMiddleware;
+use Tiny\Interfaces\IRequest;
+use Tiny\Interfaces\IResponse;
 
 class Auth implements IMiddleware {
     public function handle(IRequest &$req, IResponse &$res){

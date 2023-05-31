@@ -1,9 +1,9 @@
 <?php
-namespace src\app\libs;
+namespace App\Libs;
 
-use Exception;
-use tiny\libs\Cookie;
-use tiny\libs\Session;
+use \Exception;
+use Tiny\Libs\Cookie;
+use Tiny\Libs\Session;
 
 class AuthenticationManager {
 
@@ -15,7 +15,7 @@ class AuthenticationManager {
 			}else{
 				return null;
 			}
-		}catch(\Exception $e){
+		}catch(Exception $e){
 			return null;
 		}
 	}
@@ -28,7 +28,7 @@ class AuthenticationManager {
 		try {
 			$token = self::getToken();
 			return JWT::verify($token, JWT_SECRET);
-		}catch (\Exception $e){
+		}catch (Exception $e){
 			return false;
 		}
 	}
@@ -48,7 +48,7 @@ class AuthenticationManager {
 			}else {
 				return false;
 			}
-		}catch (\Exception $e){
+		}catch (Exception $e){
 			return false;
 		}
 
@@ -65,7 +65,7 @@ class AuthenticationManager {
 			Session::destroy("token");
 			Cookie::destroy("token");
 			return true;
-		}catch(\Exception $e){
+		}catch(Exception $e){
 			return false;
 		}
 	}

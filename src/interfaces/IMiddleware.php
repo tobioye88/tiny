@@ -1,6 +1,6 @@
 <?php
 
-namespace tiny\interfaces;
+namespace Tiny\Interfaces;
 
 interface IMiddleware {
 

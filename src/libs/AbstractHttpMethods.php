@@ -1,8 +1,8 @@
 <?php
 
-namespace tiny\libs;
+namespace Tiny\Libs;;
 
-use tiny\interfaces\IHttpAllowedMethods;
+use Tiny\Interfaces\IHttpAllowedMethods;
 
 abstract class AbstractHttpMethods implements IHttpAllowedMethods
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace tiny\exceptions;
+namespace Tiny\Exceptions;
 
 use Exception;
 

@@ -1,11 +1,11 @@
 <?php
 
 
-namespace tiny\libs;
+namespace Tiny\Libs;
 
-use tiny\exceptions\FileNotFoundException;
-use tiny\exceptions\ViewNotFoundException;
-use tiny\interfaces\IResponse;
+use Tiny\Exceptions\FileNotFoundException;
+use Tiny\Exceptions\ViewNotFoundException;
+use Tiny\Interfaces\IResponse;
 
 class Response implements IResponse {
     private $extra = [];

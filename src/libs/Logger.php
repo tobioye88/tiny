@@ -1,9 +1,9 @@
 <?php
 
-namespace tiny\libs;
+namespace Tiny\Libs;
 
 use Exception;
-use tiny\libs\App;
+use Tiny\Libs\App;
 
 /**
  * @author  advename

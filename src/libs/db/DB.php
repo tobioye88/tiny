@@ -1,12 +1,12 @@
 <?php
-namespace tiny\libs\db;
+namespace Tiny\Libs\DB;
 
 
 use \PDO;
 use stdClass;
 use \PDOException;
-use tiny\libs\Logger;
-use tiny\libs\db\exceptions\DatabaseException;
+use Tiny\Libs\Logger;
+use Tiny\Libs\DB\Exceptions\DatabaseException;
 
 /*
 * 

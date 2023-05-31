@@ -1,0 +1,10 @@
+{
+    "name": "tobioye/tiny",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Tiny\\": "src/"
+        }
+    },
+    "require": {}
+}

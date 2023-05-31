@@ -1,11 +1,11 @@
 <?php
-namespace tiny\libs\db;
+namespace Tiny\Libs\DB;
 
 use Error;
 use JsonSerializable;
 use ReflectionClass;
 use ReflectionProperty;
-use tiny\libs\db\exceptions\DatabaseException;
+use Tiny\Libs\DB\Exceptions\DatabaseException;
 
 //TODO: move mapping functions to an object mapper class
 abstract class Entity implements IEntity, JsonSerializable

@@ -1,11 +1,11 @@
 <?php
 
 
-namespace tiny\libs;
+namespace Tiny\Libs;
 
 use stdClass;
-use tiny\libs\File;
-use tiny\interfaces\IRequest;
+use Tiny\Libs\File;
+use Tiny\Interfaces\IRequest;
 
 class Request implements IRequest {
     public string $url = "";
@@ -13,6 +13,7 @@ class Request implements IRequest {
     public string $contentType = "";
     public array $queryParameters = [];
     public array $pathParameters = [];
+    public $files;
     public $body;
     public $data;
     private $headers;

@@ -1,5 +1,5 @@
 <?php
-namespace tiny\libs;
+namespace Tiny\Libs;
 
 class Group extends AbstractHttpMethods {
 

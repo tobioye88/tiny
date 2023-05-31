@@ -1,5 +1,5 @@
 <?php
-namespace src\app\libs;
+namespace Tiny\App\Libs;
 
 /**
 * rules

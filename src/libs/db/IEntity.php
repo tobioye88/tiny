@@ -1,5 +1,5 @@
 <?php
-namespace tiny\libs\db;
+namespace Tiny\Libs\DB;
 
 
 interface IEntity {

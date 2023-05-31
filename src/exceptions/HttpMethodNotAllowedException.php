@@ -1,6 +1,6 @@
 <?php
 
-namespace tiny\exceptions;
+namespace Tiny\Exceptions;
 
 
 class HttpMethodNotAllowedException extends HttpException {

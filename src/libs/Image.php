@@ -1,6 +1,6 @@
 <?php
 
-namespace tiny\libs;
+namespace Tiny\Libs;
 
 use Exception;
 

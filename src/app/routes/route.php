@@ -1,11 +1,12 @@
 <?php
 
-use tiny\interfaces\IHttpAllowedMethods;
-use tiny\interfaces\IRequest;
-use tiny\interfaces\IResponse;
-use src\app\middleware\Auth;
-use tiny\libs\App;
-use tiny\libs\Email;
+use Tiny\Interfaces\IHttpAllowedMethods;
+use Tiny\Interfaces\IRequest;
+use Tiny\Interfaces\IResponse;
+use Tiny\App\Middleware\Auth;
+use Tiny\Libs\App;
+use Tiny\Libs\Email;
+use Tiny\App\Libs\Validate;
 
 $authMiddleware = new Auth();
 
@@ -13,7 +14,16 @@ return function (App $app) use ($authMiddleware) {
 
 
     $app->get('/', function (IRequest $req, IResponse $res) {
-        $res->json(['response' => 'Hello, World!']);
+        $query = $req->getQueryParams();
+        $validate = new Validate($query, ['name' => ['string'=> true, 'required' => true ]]);
+        $isValid = $validate->passed();
+        $status = $isValid? 200 : 400;
+        $res->json([
+            'response' => 'Hello, World!', 
+            'validate' => $isValid, 
+            'message' => $validate->errors(),
+            'data' => $query,
+        ], $status);
     });
     
     $app->get('/homepage', function (IRequest $req, IResponse $res) {

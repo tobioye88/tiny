@@ -1,5 +1,5 @@
 <?php
-namespace tiny\libs\db\exceptions;
+namespace Tiny\Libs\DB\Exceptions;
 
 use \Exception;
 
