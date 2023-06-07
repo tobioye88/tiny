@@ -16,7 +16,7 @@ return function (App $app) use ($authMiddleware) {
     $app->get('/', function (IRequest $req, IResponse $res) {
         $query = $req->getQueryParams();
         $validate = new Validate($query, ['name' => ['string'=> true, 'required' => true ]]);
-        $isValid = $validate->passed();
+        $isValid = $validate->isValid();
         $status = $isValid? 200 : 400;
         $res->json([
             'response' => 'Hello, World!', 
