@@ -3,10 +3,10 @@
 use Tiny\Interfaces\IHttpAllowedMethods;
 use Tiny\Interfaces\IRequest;
 use Tiny\Interfaces\IResponse;
-use Tiny\App\Middleware\Auth;
+use Tiny\Middleware\Auth;
 use Tiny\Libs\App;
 use Tiny\Libs\Email;
-use Tiny\App\Libs\Validate;
+use Tiny\Libs\Validate;
 
 $authMiddleware = new Auth();
 

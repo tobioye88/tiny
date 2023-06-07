@@ -1,5 +1,5 @@
 <?php
-namespace App\Libs;
+namespace Tiny\Libs;
 
 use \Exception;
 use Tiny\Libs\Cookie;

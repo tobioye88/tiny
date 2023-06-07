@@ -12,7 +12,7 @@ use Tiny\Exceptions\HttpMethodNotAllowedException;
 
 
 class App extends AbstractHttpMethods {
-    public const VIEW_PATH = __DIR__ . "/../../src/App/View/";
+    public const VIEW_PATH = __DIR__ . "/../../src/Views/";
     public const BASE_PATH = __DIR__ . "/../../";
     public static string $url;
     
@@ -127,7 +127,7 @@ class App extends AbstractHttpMethods {
         throw new HttpBadRequestException("Origin not allowed");
     }
 
-    private static function defaultErrorView($errorMessage = "Unknown Error Occurred", $trace = [], $file = '', $line = ''): void {
+    private static function defaultErrorView(string $errorMessage = "Unknown Error Occurred", array $trace = [], string $file = '', string $line = ''): void {
         echo '<!DOCTYPE html>
         <html lang="en">
         
@@ -155,10 +155,10 @@ class App extends AbstractHttpMethods {
                         <div class="">
                             <h2>Something went wrong</h2>
                         </div>
-                        <div class="ty-pb-3">Error message:<br>'. $errorMessage .'</div>
-                        <div class="ty-pb-3">Trace:<br>'. implode(',', $trace) .'</div>
-                        <div class="ty-pb-3">File:<br>'. $file .'</div>
-                        <div class="ty-pb-3">Line:<br>'. $line .'</div>
+                        <div class="ty-pb-3">Error message:<br><b>'. $errorMessage .'</b></div>
+                        <div class="ty-pb-3">Trace:<br><b>'. implode('<br>', $trace) .'</b></div>
+                        <div class="ty-pb-3">File:<br><b>'. $file .'</b></div>
+                        <div class="ty-pb-3">Line:<br><b>'. $line .'</b></div>
                         <div class="lead">Go <a href="/">home</a></div>
                     </div>
                 </div>
@@ -171,7 +171,7 @@ class App extends AbstractHttpMethods {
         self::$errorViewPath = $errorViewPath;
     }
 
-    public static function renderErrorView(string $errorMessage, $trace = [], $file = '', $line = ''){
+    public static function renderErrorView(string $errorMessage, array $trace = [], string $file = '', string $line = ''){
         if(empty(App::$errorViewPath)){
             return self::defaultErrorView($errorMessage, $trace, $file, $line);
         }

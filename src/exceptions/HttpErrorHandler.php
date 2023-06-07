@@ -24,7 +24,8 @@ class HttpErrorHandler {
         $statusCode = 500;
         $type = self::SERVER_ERROR;
         $description = 'An internal error has occurred while processing your request.';
-        $trace = $file = $line = '';
+        $trace = [];
+        $file = $line = '';
 
         if ($exception instanceof HttpException) {
             $statusCode = $exception->getCode();
@@ -75,6 +76,8 @@ class HttpErrorHandler {
             default:
                 HttpHeader::setStatusCode($statusCode);
                 HttpHeader::setContentType('html');
+                // var_dump($trace);
+                // die();
                 App::renderErrorView($description, $trace, $file, $line);
                 break;
         }
