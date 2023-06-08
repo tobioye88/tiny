@@ -20,7 +20,10 @@ class HttpErrorHandler {
     public const UNAUTHORIZED = 'UNAUTHORIZED';
     
     public static function handle($exception) {
-        $exception = $exception;
+        if (is_numeric($exception)) {
+            error_log("Not an exception :" . $exception);
+            return;
+        }
         $statusCode = 500;
         $type = self::SERVER_ERROR;
         $description = 'An internal error has occurred while processing your request.';
@@ -81,5 +84,6 @@ class HttpErrorHandler {
                 App::renderErrorView($description, $trace, $file, $line);
                 break;
         }
+        exit();
     }
 }

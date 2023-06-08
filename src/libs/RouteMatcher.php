@@ -2,9 +2,10 @@
 
 namespace Tiny\Libs;
 
-use Exception;
+use \Exception;
+use Tiny\Interfaces\IRouteMatcher;
 
-class RouteMatcher {
+class RouteMatcher implements IRouteMatcher  {
     private static string $PATH_NAME_PATTERN = "/\{(\w+)\}+?/";
     private static string $PATH_VARIABLE_PATTERN = "([\w@\.\-\s\_]+)";
     public array $pathParams = [];
@@ -55,5 +56,9 @@ class RouteMatcher {
                 $this->pathParams[$keys[1][$key]] = $match;
             }
         }
+    }
+    
+    public function getPathParams(array $keys): array {
+        return $this->pathParams;
     }
 }

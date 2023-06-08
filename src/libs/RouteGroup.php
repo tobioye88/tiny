@@ -1,7 +1,9 @@
 <?php
 namespace Tiny\Libs;
 
-class Group extends AbstractHttpMethods {
+use Tiny\Interfaces\IRouteGroup;
+
+class RouteGroup extends AbstractHttpMethods implements IRouteGroup {
 
     public function getRoutes(string $prefix)
     {

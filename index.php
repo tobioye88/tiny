@@ -11,8 +11,17 @@ require __DIR__ . '/vendor/autoload.php';
 $route = require "./src/Routes/route.php";
 
 use Tiny\Libs\App;
+use Tiny\Libs\Request;
+use Tiny\Libs\Response;
+use Tiny\Libs\RouteMatcher;
+use Tiny\Libs\RouteGroup;
 
-$app = new App;
+$app = new App(
+  new Request(), 
+  new Response(), 
+  new RouteMatcher(), 
+  new RouteGroup()
+);
 
 $route($app);
 

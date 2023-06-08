@@ -2,8 +2,11 @@
 
 namespace Tiny\Libs;
 
-use Exception;
+use \Exception;
+use Tiny\Interfaces\IResponse;
 use Tiny\Interfaces\IRequest;
+use Tiny\Interfaces\IRouteGroup;
+use Tiny\Interfaces\IRouteMatcher;
 use Tiny\Interfaces\IMiddleware;
 use Tiny\Exceptions\HttpErrorHandler;
 use Tiny\Exceptions\ResourceNotFound;
@@ -22,7 +25,12 @@ class App extends AbstractHttpMethods {
     private array $globalMiddleWare = [];
     private array $currentMiddleware = [];
 
-    public function __construct()
+    public function __construct(
+        private IRequest $request, 
+        private IResponse $response,
+        private IRouteMatcher $routeMatcher,
+        private IRouteGroup $routeGroup,
+        )
     {
         session_start();
         date_default_timezone_set(DEFAULT_TIME_ZONE);
@@ -48,27 +56,24 @@ class App extends AbstractHttpMethods {
 
     public function start(){
         try{
-            $req = new Request;
-            $res = new Response;
-            
             foreach($this->globalMiddleWare as $key => $middleware){
-                $middleware->handle($req, $res);
+                $middleware->handle($this->request, $this->response);
             }
     
-            App::$url = $url = $req->getUrl();
-            $method = $req->getMethod();
+            App::$url = $url = $this->request->getUrl();
+            $method = $this->request->getMethod();
             $registeredMethod = $this->registeredRoute[$method] ?? null;
             
             if($registeredMethod == null){
-                throw new HttpMethodNotAllowedException("Method not supported");
+                throw new HttpMethodNotAllowedException("Method not supported", 405);
             }
 
-            if($this->hasRoute($url, $method, $req)){
+            if($this->hasRoute($url, $method, $this->request)){
                 $routeMiddleware = $this->currentMiddleware;
                 foreach($routeMiddleware as $key => $middleware){
-                    $middleware->handle($req, $res);
+                    $middleware->handle($this->request, $this->response);
                 }
-                call_user_func($this->callback, $req, $res);
+                call_user_func($this->callback, $this->request, $this->response);
             }else{
                 throw new ResourceNotFound("404 Not Found");
             }
@@ -78,10 +83,9 @@ class App extends AbstractHttpMethods {
     }
 
     public function group(string $prefix, callable $callback, array $middleware = []){
-        $group = new Group();
-        $callback($group);
-        $groupRoutes = $group->getRoutes($prefix);
-        $groupMiddleware = $group->getMiddleware($prefix, $middleware);
+        $callback($this->routeGroup);
+        $groupRoutes = $this->routeGroup->getRoutes($prefix);
+        $groupMiddleware = $this->routeGroup->getMiddleware($prefix, $middleware);
 
         foreach ($this->registeredRoute as $method => $value){
             $this->registeredRoute[$method] = array_merge($this->registeredRoute[$method], $groupRoutes[$method]);
@@ -89,14 +93,13 @@ class App extends AbstractHttpMethods {
         $this->routeMiddleWare = array_merge($this->routeMiddleWare, $groupMiddleware);
     }
 
-    public function hasRoute(string $url, $method, IRequest &$req): bool {
-        $matcher = new RouteMatcher();
+    public function hasRoute(string $url, $method, IRequest &$request): bool {
         foreach ($this->registeredRoute[$method] as $innerRoute => $callback) {
-            $result = $matcher->match($innerRoute, $url);
+            $result = $this->routeMatcher->match($innerRoute, $url);
             if($result){
                 $this->callback = $callback;
                 $this->currentMiddleware = $this->routeMiddleWare[$innerRoute.':'.$method] ?? [];
-                $req->setPathParams($matcher->pathParams);
+                $request->setPathParams($this->routeMatcher->pathParams);
                 return $result;
             }
         }

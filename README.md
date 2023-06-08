@@ -81,7 +81,7 @@ $group->get('/posts', function(IRequest $req, IResponse $res){
 ```
 
 
-### Group Routes
+### Routes Group
 
 For grouping routes  
 eg:
