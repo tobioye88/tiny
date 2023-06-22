@@ -1,10 +1,10 @@
 # Tiny Framework
-> Version 1.1.0
+> Version 2.0.0
    
 
 
 Tiny framework is a quick starting point for bootstrapping PHP web apps.
-Tiny framework was built with Developers in mind. This make it easy for developers to quickly create APIs and wep apps
+Tiny framework was built with Developers in mind. This makes it easy for developers to quickly create APIs and web apps
 
 
 
@@ -37,7 +37,7 @@ $app->delete('/', function(IRequest $req, IResponse $res){});
 ```
 
 ### Application Views
-Views are located in the app folder `app/views/index`  
+Views are located in the app folder `src/Views/index`  
 Use the variables in the view file like they were declared in the file;
 
 ```php
@@ -109,7 +109,7 @@ eg:
 class AuthorizedMiddleware implements IMiddleware {
     public function handle(IRequest $req, IResponse $res){
         $token = $req->getHeader('token');
-        // Check if token is valid
+        // Check if the token is valid
         if(!JWT::verify($token, JWT_SECRET)){
             throw new HttpUnauthorizedException("Unauthorized Request");
         }
@@ -120,7 +120,7 @@ class AuthorizedMiddleware implements IMiddleware {
 
 When validation for middleware fails throw an exception to interrupt the flow.
 
-There are three levels at which middle ware can be applied
+There are three levels at which middleware can be applied
 1. Application level
 2. Group level
 3. Route level 
