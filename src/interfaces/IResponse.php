@@ -6,7 +6,7 @@ interface IResponse {
 
     public function status(int $code);
 
-    public function json($body, $statusCode=200);
+    public function json(array $body, $statusCode=200);
     
     public function write(string $body);
     

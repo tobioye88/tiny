@@ -16,7 +16,6 @@ use Tiny\Libs\Container;
 
 
 $container = new Container();
-
 $app = $container->get(App::class);
 
 $route($app->getRouter());

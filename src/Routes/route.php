@@ -1,5 +1,6 @@
 <?php
 
+use Tiny\Controllers\UserController;
 use Tiny\Interfaces\IHttpAllowedMethods;
 use Tiny\Interfaces\IRequest;
 use Tiny\Interfaces\IResponse;
@@ -78,4 +79,9 @@ return function (Router $router) use ($authMiddleware) {
         });
 
     }, [ $authMiddleware ]);
+
+    $router->get('/user', [UserController::class, 'getUser']);
+    $router->group('/user', function (IHttpAllowedMethods $group) {
+        $group->get('/one', [UserController::class, 'getUser']);
+    });
 };

@@ -1,5 +1,5 @@
 # Tiny Framework
-> Version 2.0.0
+> Version 2.1.0
    
 
 
@@ -15,6 +15,16 @@ Tiny framework was built with Developers in mind. This makes it easy for develop
 $app->get('/', function(IRequest $req, IResponse $res){
     $res->json(['response' => 'Hello, World!']);
 });
+
+```
+
+OR
+
+```php
+
+// Hello World
+
+$app->get('/user', [UserController::class, 'getUser']);
 
 ```
 

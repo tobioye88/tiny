@@ -12,6 +12,7 @@ class Container implements ContainerInterface {
   private array $cachedEntries = [];
 
   function __construct() {
+    $this->set(Container::class, fn() => $this);
     $containerMap = require __DIR__ . '/../container_map.php';
     if (!is_array($containerMap)) {
       return;

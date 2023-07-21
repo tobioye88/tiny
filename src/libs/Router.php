@@ -9,8 +9,9 @@ use Tiny\Interfaces\IRequest;
 use Tiny\Interfaces\IResponse;
 use Tiny\Interfaces\IRouteGroup;
 use Tiny\Interfaces\IRouteMatcher;
+use Tiny\Libs\HttpAllowedMethods;
 
-class Router implements IHttpAllowedMethods
+class Router extends HttpAllowedMethods implements IHttpAllowedMethods
 {
     protected array $routeMiddleWare = [];
     protected array $registeredRoute = [
@@ -24,45 +25,13 @@ class Router implements IHttpAllowedMethods
 
     public function __construct(
         private IRouteGroup $routeGroup,
-        private IRouteMatcher $routeMatcher) {}
+        private IRouteMatcher $routeMatcher,
+        private Container $container,
+        ) {}
 
-    public function register(string $method, string $route, callable $callback, array $middleware = []){
-        $route = '/' . trim($route, "/");
-        $this->routeMiddleWare[$route . ':' . $method] = $middleware;
-        $this->registeredRoute[$method][$route] = $callback;
-    }
+    
 
-    public function get(string $route, callable $callback, array $middleware = []){
-        $this->register('GET', $route, $callback, $middleware);
-    }
-
-    public function post(string $route, callable $callback, array $middleware = []){
-        $this->register('POST', $route, $callback, $middleware);
-    }
-
-    public function put(string $route, callable $callback, array $middleware = []){
-        $this->register('PUT', $route, $callback, $middleware);
-    }
-
-    public function patch(string $route, callable $callback, array $middleware = []){
-        $this->register('PATCH', $route, $callback, $middleware);
-    }
-
-    public function delete(string $route, callable $callback, array $middleware = []){
-        $this->register('DELETE', $route, $callback, $middleware);
-    }
-
-    public function options(string $route, callable $callback, array $middleware = []){
-        $this->routeMiddleWare[trim($route . ':POST', "/")] = $middleware;
-    }
-
-    public function any(string $route, callable $callback, array $middleware = []){
-        foreach ($this->registeredRoute as $method => $value){
-            $this->register($method, $route, $callback, $middleware);
-        }
-    }
-
-    public function group(string $prefix, callable $callback, array $middleware = []){;
+    public function group(string $prefix, callable|array $callback, array $middleware = []){;
         $callback($this->routeGroup);
         $groupRoutes = $this->routeGroup->getRoutes($prefix);
         $groupMiddleware = $this->routeGroup->getMiddleware($prefix, $middleware);
@@ -82,13 +51,34 @@ class Router implements IHttpAllowedMethods
             throw new HttpMethodNotAllowedException("Method not supported", 405);
         }
 
-        [$routeCallable, $routeMiddleware] = $this->getRouteAndMiddleware($url, $method);
+        [$action, $routeMiddleware] = $this->getRouteAndMiddleware($url, $method);
         $request->setPathParams($this->routeMatcher->getPathParams());
         
         foreach($routeMiddleware as $key => $middleware){
             $middleware->handle($request, $response);
         }
-        call_user_func($routeCallable, $request, $response);
+        
+        if (is_callable($action)) {
+            return call_user_func($action, $request, $response);
+        }
+
+        [$class, $method] = $action;
+
+        if (class_exists($class)) {
+            $class = $this->container->get($class);
+
+            if (method_exists($class, $method)) {
+                $result = call_user_func_array([$class, $method], []);
+                if (is_array($result)) {
+                    $response->json($result);
+                } else if (is_string($result)) {
+                    $response->text($result);
+                }
+                return;
+            }
+        }
+
+        throw new HttpMethodNotAllowedException("Route not found", 404);
     }
 
     public function getRouteAndMiddleware(string $url, $method): array {
