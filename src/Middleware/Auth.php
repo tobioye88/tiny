@@ -11,12 +11,11 @@ use Tiny\Interfaces\IResponse;
 
 class Auth implements IMiddleware {
     public function handle(IRequest &$req, IResponse &$res){
-        $token = $req->getSession('token');
+        $token = $req->getHeader('Authorization');
 
-        if(!isset($token) || !JWT::verify($token, JWT_SECRET)){
+        if(!isset($token)){ // || !JWT::verify($token, JWT_SECRET)){
             if($req->acceptJson()){
                 throw new HttpUnauthorizedException("Unauthorized Request");
-                exit;
             }
 
             $req->destroySession("token");

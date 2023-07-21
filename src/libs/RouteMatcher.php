@@ -58,7 +58,11 @@ class RouteMatcher implements IRouteMatcher  {
         }
     }
     
-    public function getPathParams(array $keys): array {
+    public function getPathParams(): array {
         return $this->pathParams;
+    }
+
+    public function getPathParam(string $key): ?string {
+        return $this->pathParams[$key];
     }
 }

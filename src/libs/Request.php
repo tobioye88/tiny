@@ -8,15 +8,14 @@ use Tiny\Libs\File;
 use Tiny\Interfaces\IRequest;
 
 class Request implements IRequest {
-    public string $url = "";
-    public string $method = "";
-    public string $contentType = "";
-    public array $queryParameters = [];
-    public array $pathParameters = [];
+    private string $url = "";
+    private string $method = "";
+    private string $contentType = "";
+    private array $queryParameters = [];
+    private array $pathParameters = [];
     public $files;
-    public $body;
-    public $data;
-    private $headers;
+    public array $body;
+    private array $headers;
 
 
     public function __construct()
@@ -34,7 +33,7 @@ class Request implements IRequest {
         $this->queryParameters = $_GET;
         $this->files = $_FILES;
         $this->body = $this->parseBody();
-        $this->headers =  apache_request_headers();
+        $this->headers = apache_request_headers();
     }
 
 
@@ -58,17 +57,17 @@ class Request implements IRequest {
         return $this->pathParameters;
     }
 
-    public function setPathParams($pathParams)
+    public function setPathParams(array $pathParams)
     {
         $this->pathParameters = $pathParams;
     }
     
-    public function getUrl()
+    public function getUrl(): string
     {
         return $this->url;
     }
     
-    public function getMethod()
+    public function getMethod(): string
     {
         return $this->method;
     }
@@ -88,10 +87,10 @@ class Request implements IRequest {
     {
         $res = $_POST;
         $raw = $this->parseRawInput();
-        return (object) array_merge((array) $res, (array) $raw);
+        return array_merge((array) $res, (array) $raw);
     }
 
-    private function parseRawInput(){
+    private function parseRawInput(): array {
         $inputJSON = file_get_contents('php://input');
         $raw = new stdClass;
         if(substr($inputJSON, 0, 2) == '"{'){
@@ -118,7 +117,7 @@ class Request implements IRequest {
                 }
             }
         }
-        return $raw;
+        return (array) $raw;
     }
 
 
@@ -150,6 +149,16 @@ class Request implements IRequest {
         return $this->headers;
     }
 
+    public function getBody(): ?array
+    {
+        return $this->body ?? null;
+    }
+
+    public function getContentType(): ?array
+    {
+        return $this->contentType ?? null;
+    }
+
     public function setCookies(string $name, $value)
     {
         return Cookie::set($name, $value);
@@ -175,7 +184,7 @@ class Request implements IRequest {
         return Session::get($name);
     }
 
-    public function destroySession($name)
+    public function destroySession(string $name)
     {
         Session::destroy($name);
     }
@@ -194,28 +203,28 @@ class Request implements IRequest {
         return isset($this->files[$fileName]);
     }
 
-    public function file($fileName)
+    public function file(string $fileName)
     {
         return $this->files[$fileName];
     }
     
-    public function files($fileName = null)
+    public function files(string $fileName = null)
     {
         if(!$fileName) return $this->files;
-        return $this->files[$fileName]; // TODO COMPLETE IMPLEMENTATION
+        return $this->files[$fileName];
     }
 
-    public function fileSize($fileName)
+    public function fileSize(string $fileName)
     {
         return $this->files[$fileName]["size"]; 
     }
 
-    public function fileName($fileName)
+    public function fileName(string $fileName)
     {
         return $this->files[$fileName]["name"];
     }
     
-    public function fileType($fileName)
+    public function fileType(string $fileName)
     {
         return $this->files[$fileName]["type"]; ;
     }
@@ -233,10 +242,10 @@ class Request implements IRequest {
     {
         $responseList = [];
         foreach($nameList as $item){
-            if(!isset($this->body->{$item})){
+            if(!isset($this->body[$item])){
                 continue;
             }
-            $responseList[$item] = $this->body->{$item};
+            $responseList[$item] = $this->body[$item];
         }
         return $responseList;
     }

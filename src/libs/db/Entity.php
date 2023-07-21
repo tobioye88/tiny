@@ -10,9 +10,11 @@ use Tiny\Libs\DB\Exceptions\DatabaseException;
 //TODO: move mapping functions to an object mapper class
 abstract class Entity implements IEntity, JsonSerializable
 {
+    protected int $id;
     protected string $tableName;
     private static $preSaveFunction;
     private static $postSaveFunction;
+    private DB $db;
 
     public function __construct(int $id = null) {
         if($id){
@@ -42,7 +44,7 @@ abstract class Entity implements IEntity, JsonSerializable
         }
 
         if (isset($this->id) && $this->id > 0) {
-            $this->db = DB::ins()->update($tableName, $params, $this->id);
+            DB::ins()->update($tableName, $params, $this->id);
         } else {
             $this->id = DB::ins()->insert($tableName, $params)->getLastId();
         }
@@ -66,7 +68,7 @@ abstract class Entity implements IEntity, JsonSerializable
     public static function create(array $args): self
     {
         $class = new ReflectionClass(get_called_class());
-        $entity = $class->newInstance();
+        $entity = (object) $class->newInstance();
 
         foreach (self::getAllProperties($class) as $property) {
             $propertyName = $property->getName();
@@ -107,7 +109,7 @@ abstract class Entity implements IEntity, JsonSerializable
     public static function fill(array $assoc): self
     {
         $class = new ReflectionClass(get_called_class());
-        $entity = $class->newInstance();
+        $entity = (object) $class->newInstance();
 
         foreach (self::getAllProperties($class) as $property) {
             $propertyName = $property->getName();
@@ -130,7 +132,7 @@ abstract class Entity implements IEntity, JsonSerializable
 
     private static function getTableName(){
         $class = new ReflectionClass(get_called_class()); // this is a static method that's why i use get_called_class
-        $entity = $class->newInstance();
+        $entity = (object) $class->newInstance();
         return $entity->tableName ?? null;
     }
 

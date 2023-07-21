@@ -14,6 +14,7 @@ class Image extends File {
 	private static $_instance;
 	private	$_resizedPath,
 	$_croppedPath,
+	$_options,
 	$_gps;
 
 	public static function set(string $destination, $fieldname): self {

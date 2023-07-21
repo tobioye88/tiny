@@ -3,17 +3,16 @@
 use Tiny\Interfaces\IHttpAllowedMethods;
 use Tiny\Interfaces\IRequest;
 use Tiny\Interfaces\IResponse;
-use Tiny\Middleware\Auth;
-use Tiny\Libs\App;
-use Tiny\Libs\Email;
+use Tiny\Libs\Router;
 use Tiny\Libs\Validate;
+use Tiny\Middleware\Auth;
 
 $authMiddleware = new Auth();
 
-return function (App $app) use ($authMiddleware) {
+return function (Router $router) use ($authMiddleware) {
 
 
-    $app->get('/', function (IRequest $req, IResponse $res) {
+    $router->get('/', function (IRequest $req, IResponse $res) {
         $query = $req->getQueryParams();
         $validate = new Validate($query, ['name' => ['string'=> true, 'required' => true ]]);
         $isValid = $validate->isValid();
@@ -26,32 +25,32 @@ return function (App $app) use ($authMiddleware) {
         ], $status);
     });
     
-    $app->get('/homepage', function (IRequest $req, IResponse $res) {
+    $router->get('/homepage', function (IRequest $req, IResponse $res) {
         $message = "Hello World";
         $res->view('index.php', compact('message'));
     });
 
-    $app->any('/login', function (IRequest $req, IResponse $res) {
+    $router->any('/login', function (IRequest $req, IResponse $res) {
         $res->json(["login" => 'Please login here']);
     });
 
-    $app->get('/api/{name}/world', function (IRequest $req, IResponse $res) {
+    $router->get('/api/{name}/world', function (IRequest $req, IResponse $res) {
         $res->json(["user" => ['username' => $req->getPathParam('name')]]);
     });
 
-    $app->put('/api/admin', function (IRequest $req, IResponse $res) {
-        $res->json(["res" => trim("/api/", '/'), "body"=> $req->body]);
+    $router->put('/api/admin', function (IRequest $req, IResponse $res) {
+        $res->json(["res" => trim("/api/", '/'), "body"=> $req->getBody()]);
     }, [$authMiddleware]);
 
-    $app->delete('/api/admin', function (IRequest $req, IResponse $res) {
-        $res->json(["res" => trim("/api/", '/'), "body"=> $req->body]);
+    $router->delete('/api/admin', function (IRequest $req, IResponse $res) {
+        $res->json(["res" => trim("/api/", '/'), "body"=> $req->getBody()]);
     });
 
-    $app->post('/api/query', function (IRequest $req, IResponse $res) {
+    $router->post('/api/query', function (IRequest $req, IResponse $res) {
         $res->json($req->getQueryParams());
     });
 
-    $app->group('api/v1/', function (IHttpAllowedMethods $group) use ($authMiddleware) {
+    $router->group('api/v1/', function (IHttpAllowedMethods $group) use ($authMiddleware) {
 
         $group->get('/', function (IRequest $req, IResponse $res) {
             $res->json(['hello' => 'Inner route']);
@@ -63,7 +62,7 @@ return function (App $app) use ($authMiddleware) {
 
     },); // [ $authMiddleware ]);
 
-    $app->group('api/v2/{name}', function (IHttpAllowedMethods $group) use ($authMiddleware) {
+    $router->group('api/v2/{name}', function (IHttpAllowedMethods $group) use ($authMiddleware) {
 
         $group->get('/special', function (IRequest $req, IResponse $res) {
             $res->json([

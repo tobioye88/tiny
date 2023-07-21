@@ -9,5 +9,6 @@ interface IRouteMatcher {
   public function routeEquals(string $appRoute, string $httpRoute): bool;
   public function routeContainsPathParams(string $appRoute): bool;
   public function setPathParams(array $keys, array $matches): void; 
-  public function getPathParams(array $keys): array; 
+  public function getPathParams(): array; 
+  public function getPathParam(string $key): ?string;
 }

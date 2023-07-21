@@ -15,12 +15,14 @@ class Response implements IResponse {
         $this->extra = $extra;
     }
 
-    public function status(int $code){
+    public function status(int $code)
+    {
         HttpHeader::setStatusCode($code);
         return $this;
     }
 
-    public function view($_path, array $extra=[]){
+    public function view($_path, array $extra=[])
+    {
         foreach($extra as $key => $value){
             $$key = $value;
         }
@@ -34,7 +36,8 @@ class Response implements IResponse {
         }
     }
 
-    public function file($path){
+    public function file($path)
+    {
         $stringArray = explode(".", $path);
         $ext = end($stringArray);
         array_pop($stringArray);
@@ -56,7 +59,8 @@ class Response implements IResponse {
         }
     }
 
-    public function json($body, $statusCode=200){
+    public function json($body, $statusCode=200): void
+    {
         HttpHeader::setContentType('json');
         HttpHeader::setStatusCode($statusCode);
         echo json_encode($body); //, JSON_PRETTY_PRINT
@@ -69,7 +73,8 @@ class Response implements IResponse {
         exit();
     }
     
-    public function text(string $text){
+    public function text(string $text): void
+    {
         header('Content-type: text/plain; charset=utf-8');
         echo $text;
         exit();
@@ -92,7 +97,7 @@ class Response implements IResponse {
         return ("?" == $queryString) ? "" : $queryString;
     }
 
-    public function redirect(string $path, $queryParams = [])
+    public function redirect(string $path, $queryParams = []): void
     {
         self::goTo($path . self::arrayToQueryParams($queryParams));
         exit();

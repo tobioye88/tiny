@@ -13,16 +13,19 @@ interface IRequest {
     
     public function getPathParams();
     
-    public function getUrl();
+    public function getUrl(): string;
     
-    public function getMethod();
+    public function getMethod(): string;
     
-    public function setPathParams($pathParams);
+    public function setPathParams(array $pathParams);
     
     public function getHeader(string $name);
     
     public function getHeaders();
+    public function getBody(): ?array;
     
+    public function getContentType(): ?array;
+
     public function setCookies(string $name, $value);
 
     public function getCookies(string $name);
@@ -33,21 +36,21 @@ interface IRequest {
 
     public function setSession(string $name, $value);
     
-    public function destroySession($name);
+    public function destroySession(string $name);
 
     public function uploadFile(string $destination, string $fieldName, $newName=null): bool;
 
     public function hasFile(string $fieldName): bool;
 
-    public function file($fileName);
+    public function file(string $fileName);
 
-    public function files($fileName = null);
+    public function files(string $fileName = null);
 
-    public function fileSize($fileName);
+    public function fileSize(string $fileName);
 
-    public function fileName($fileName);
+    public function fileName(string $fileName);
     
-    public function fileType($fileName);
+    public function fileType(string $fileName);
 
     public function acceptJson(): bool;
 
